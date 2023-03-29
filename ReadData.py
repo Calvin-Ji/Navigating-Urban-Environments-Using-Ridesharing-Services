@@ -63,21 +63,23 @@ def get_avg_times_and_miles(l: list[tuple[datetime.time, str, str, float]]) -> d
     final_dict = {}
     for data in l:
         # Get all the times
-        if links_so_far_with_times[f'{l[1]}:{l[2]}'] is None:
+        if f'{l[1]}:{l[2]}' not in links_so_far_with_times:
             links_so_far_with_times[f'{l[1]}:{l[2]}'] = [l[0]]
-        links_so_far_with_times[f'{l[1]}:{l[2]}'] += [l[0]]
+        else:
+            links_so_far_with_times[f'{l[1]}:{l[2]}'] += [l[0]]
         # Get all the distances
-        if links_so_far_with_miles[f'{l[1]}:{l[2]}'] is None:
+        if f'{l[1]}:{l[2]}' not in links_so_far_with_miles:
             links_so_far_with_miles[f'{l[1]}:{l[2]}'] = [l[3]]
-        links_so_far_with_miles[f'{l[1]} {l[2]}'] += [l[3]]
+        else:
+            links_so_far_with_miles[f'{l[1]}:{l[2]}'] += [l[3]]
 
-    for item in links_so_far_with_times:
-        avg_time = sum(
-            links_so_far_with_times[item]) / len(links_so_far_with_times[item])
-        listy = item.split(':')
-        start = listy[0]
-        stop = listy[1]
-        final_dict[{start, stop}] = [avg_time]
+    # for item in links_so_far_with_times:
+        # avg_time = sum(
+        #     links_so_far_with_times[item]) / len(links_so_far_with_times[item])
+        # listy = item.split(':')
+        # start = listy[0]
+        # stop = listy[1]
+        # final_dict[{start, stop}] = [avg_time]
 
     for item in links_so_far_with_miles:
         avg_miles = sum(
@@ -118,4 +120,4 @@ def estimate_county_size(county_name: str, data: dict[set[str]:list[float]]) -> 
 
 
 if __name__ == '__main__':
-    print(read_csv('data/test.csv'))
+    print(estimate_county_size(get_avg_times_and_miles(read_csv('data/large_test.csv'))))
