@@ -93,22 +93,18 @@ def get_avg_times_and_miles(l: list[tuple[float, str, str, float]]) -> dict[tupl
     return final_dict
 
 
-def estimate_county_size(county_name: str, data: dict[tuple[str]:list[float]]) -> tuple[float]:
-    """Make a rough estimate of of the county size in miles squared and return it, where 
-    the first float in the tuple is a lower bound and the second float in the tuple is a upper bound.
-    We can assume that the county is a perfect sphere and assume that on average that the start
-    location is in the middle of the county. So we get the average length of rides that start and 
-    stop in the same city, and that is our lower bound for our radius. So lower bound of the area
-    is the average length of rides that start and stop in the same city squared times pi (we could 
-    approximate pi as 3.14 or use math.pi) Then for upper bound we could find the average distance 
+def estimate_county_size(county_name: str, data: dict[tuple[str]:list[float]]) -> float:
+    """Make a very rough estimate of of the county size in miles squared and return it.
+    We can first assume that the county is a perfect sphere and assume that on average that the start
+    location is in the middle of the county. We could find the average distance 
     from the city whose area we are trying to approximate to every other city that it is connected to. 
     We take the smallest average distance because presumably that would be the closest city that is 
-    nearby, and that could be a upper bound for our radius."""
-    lower_radius = 0
-    for set_of_county_names in data:
-        if set_of_county_names == (county_name, county_name):
-            lower_radius = data[set_of_county_names][1]
-    lower_bound = pi * (lower_radius) ** 2
+    nearby, and that could be a guess for our radius."""
+    # lower_radius = 0
+    # for set_of_county_names in data:
+    #     if set_of_county_names == (county_name, county_name):
+    #         lower_radius = data[set_of_county_names][1]
+    # lower_bound = pi * (lower_radius) ** 2
 
     avg_distances_to_cities = [inf]
     for set_of_county_names in data:
@@ -117,10 +113,10 @@ def estimate_county_size(county_name: str, data: dict[tuple[str]:list[float]]) -
     upper_radius = min(avg_distances_to_cities)
     upper_bound = pi * (upper_radius) ** 2
 
-    return (lower_bound, upper_bound)
+    return upper_bound
 
 
 
 if __name__ == '__main__':
     #print(read_csv('data/large_test.csv'))
-    print(estimate_county_size("New York", get_avg_times_and_miles(read_csv('data/My Uber Drives - 2016.csv'))))
+    print(estimate_county_size("Midtown", get_avg_times_and_miles(read_csv('data/My Uber Drives - 2016.csv'))))
