@@ -1,8 +1,8 @@
 import datetime
 from math import pi #This is for the estimate size function - Calvin
 
-def read_csv(file_name: str) -> tuple[float, str, str, float]:
-    """ Reads the csv file and returns a tuple of (time, start_loc, stop_loc, distance)
+def read_csv(file_name: str) -> list[tuple[float, str, str, float]]:
+    """ Reads the csv file and returns a list of tuples of (time, start_loc, stop_loc, distance)
 
     time is a float representing the amount of time taken in seconds
     start_loc is a string representing the starting neighborhood
@@ -80,6 +80,14 @@ def get_avg_times_and_miles(l: list[tuple[datetime.time, str, str, float]]) -> d
         # start = listy[0]
         # stop = listy[1]
         # final_dict[{start, stop}] = [avg_time]
+
+    avg_time = sum(
+            [links_so_far_with_times[item] for item in links_so_far_with_times]) / len( [links_so_far_with_times[item] for item in links_so_far_with_times])
+    listy = item.split(':')
+    start = listy[0]
+    stop = listy[1]
+    final_dict[{start, stop}] = [avg_time]
+
 
     for item in links_so_far_with_miles:
         avg_miles = sum(
