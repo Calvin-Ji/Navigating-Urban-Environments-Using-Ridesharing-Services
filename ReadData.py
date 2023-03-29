@@ -1,5 +1,5 @@
 import datetime
-from math import pi #This is for the estimate size function - Calvin
+from math import pi, inf #This is for the estimate size function - Calvin
 
 def read_csv(file_name: str) -> list[tuple[float, str, str, float]]:
     """ Reads the csv file and returns a list of tuples of (time, start_loc, stop_loc, distance)
@@ -49,45 +49,39 @@ def read_csv(file_name: str) -> list[tuple[float, str, str, float]]:
             time_delta = stop_datetime - start_datetime
 
             trip_data.append(
-                (time_delta.total_seconds(), start_loc, stop_loc, distance))
+                (time_delta.total_seconds(), start_loc, stop_loc, float(distance)))
 
             # print(time_delta)
     return trip_data
 
 
-def get_avg_times_and_miles(l: list[tuple[datetime.time, str, str, float]]) -> dict[set[str]:list[float]]:
+def get_avg_times_and_miles(l: list[tuple[float, str, str, float]]) -> dict[tuple[str, str]:list[float]]:
     """Return a dictionary where a set of 2 endpoints are keys and the list containing the
-    average time at index 0 and average distance at index 1 as keys."""
+    average time at index 0 and average distance at index 1."""
+    # A mapping of the endpoints to time
     links_so_far_with_times = {}
+    # A mapping of the endpoints to distance
     links_so_far_with_miles = {}
     final_dict = {}
     for data in l:
         # Get all the times
-        if f'{l[1]}:{l[2]}' not in links_so_far_with_times:
-            links_so_far_with_times[f'{l[1]}:{l[2]}'] = [l[0]]
+        if f'{data[1]}:{data[2]}' not in links_so_far_with_times:
+            links_so_far_with_times[f'{data[1]}:{data[2]}'] = [data[0]]
         else:
-            links_so_far_with_times[f'{l[1]}:{l[2]}'] += [l[0]]
+            links_so_far_with_times[f'{data[1]}:{data[2]}'] += [data[0]]
         # Get all the distances
-        if f'{l[1]}:{l[2]}' not in links_so_far_with_miles:
-            links_so_far_with_miles[f'{l[1]}:{l[2]}'] = [l[3]]
+        if f'{data[1]}:{data[2]}' not in links_so_far_with_miles:
+            links_so_far_with_miles[f'{data[1]}:{data[2]}'] = [data[3]]
         else:
-            links_so_far_with_miles[f'{l[1]}:{l[2]}'] += [l[3]]
+            links_so_far_with_miles[f'{data[1]}:{data[2]}'] += [data[3]]
 
-    # for item in links_so_far_with_times:
-        # avg_time = sum(
-        #     links_so_far_with_times[item]) / len(links_so_far_with_times[item])
-        # listy = item.split(':')
-        # start = listy[0]
-        # stop = listy[1]
-        # final_dict[{start, stop}] = [avg_time]
-
-    avg_time = sum(
-            [links_so_far_with_times[item] for item in links_so_far_with_times]) / len( [links_so_far_with_times[item] for item in links_so_far_with_times])
-    listy = item.split(':')
-    start = listy[0]
-    stop = listy[1]
-    final_dict[{start, stop}] = [avg_time]
-
+    for item in links_so_far_with_times:
+        avg_time = sum(
+            links_so_far_with_times[item]) / len(links_so_far_with_times[item])
+        listy = item.split(':')
+        start = listy[0]
+        stop = listy[1]
+        final_dict[(start, stop)] = [avg_time]
 
     for item in links_so_far_with_miles:
         avg_miles = sum(
@@ -95,11 +89,11 @@ def get_avg_times_and_miles(l: list[tuple[datetime.time, str, str, float]]) -> d
         listy = item.split(':')
         start = listy[0]
         stop = listy[1]
-        final_dict[{start, stop}] += [avg_miles]
+        final_dict[(start, stop)] += [avg_miles]
     return final_dict
 
 
-def estimate_county_size(county_name: str, data: dict[set[str]:list[float]]) -> tuple[float]:
+def estimate_county_size(county_name: str, data: dict[tuple[str]:list[float]]) -> tuple[float]:
     """Make a rough estimate of of the county size in miles squared and return it, where 
     the first float in the tuple is a lower bound and the second float in the tuple is a upper bound.
     We can assume that the county is a perfect sphere and assume that on average that the start
@@ -112,13 +106,13 @@ def estimate_county_size(county_name: str, data: dict[set[str]:list[float]]) -> 
     nearby, and that could be a upper bound for our radius."""
     lower_radius = 0
     for set_of_county_names in data:
-        if set_of_county_names == {county_name, county_name}:
+        if set_of_county_names == (county_name, county_name):
             lower_radius = data[set_of_county_names][1]
     lower_bound = pi * (lower_radius) ** 2
 
-    avg_distances_to_cities = [0]
+    avg_distances_to_cities = [inf]
     for set_of_county_names in data:
-        if set_of_county_names.contains(county_name) and set_of_county_names != {county_name, county_name}:
+        if county_name in set_of_county_names and set_of_county_names != (county_name, county_name):
             avg_distances_to_cities.append(data[set_of_county_names][1])
     upper_radius = min(avg_distances_to_cities)
     upper_bound = pi * (upper_radius) ** 2
@@ -128,4 +122,5 @@ def estimate_county_size(county_name: str, data: dict[set[str]:list[float]]) -> 
 
 
 if __name__ == '__main__':
-    print(estimate_county_size(get_avg_times_and_miles(read_csv('data/large_test.csv'))))
+    #print(read_csv('data/large_test.csv'))
+    print(estimate_county_size("New York", get_avg_times_and_miles(read_csv('data/My Uber Drives - 2016.csv'))))
