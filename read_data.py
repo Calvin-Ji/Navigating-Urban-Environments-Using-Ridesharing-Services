@@ -1,5 +1,7 @@
 import datetime
 import math  # This is for the estimate size function - Calvin
+import computations
+import numpy as np
 
 
 def read_csv(file_name: str) -> list[tuple[float, str, str, float]]:
@@ -89,42 +91,59 @@ def get_avg_times_and_miles(l: list[tuple[float, str, str, float]]) -> dict[tupl
     return final_dict
 
 
-def estimate_neighborhood_size(neighborhood_name: str, data: dict[tuple[str]:list[float]]) -> float:
+def data_to_np(data_dict: dict[tuple[str, str]: list[float]]) -> np.array:
     """
-    Make a very rough estimate of of the neighborhood size in miles squared and return it.
-    We can first assume that the neighborhood is a perfect circle and assume that on average that the start
-    location is in the middle of the neighborhood. We could find the average distance 
-    from the city whose area we are trying to approximate to every other city that it is connected to. 
-    We take the smallest average distance because presumably that would be the closest city that is 
-    nearby, and that could be a guess for our radius.
-
-    Preconditions:
-    - any(neighborhood_name in pair for pair in data)  # neighborhood_name exists in data
+      0 1 2 3 4
+    0 0 d d d d
+    1 d 0 d d d
+    2 d d 0 d d
+    3 d d d 0 d
+    4 d d d d 0
     """
-    # lower_radius = 0
-    # for set_of_neighborhood_names in data:
-    #     if set_of_neighborhood_names == (neighborhood_name, neighborhood_name):
-    #         lower_radius = data[set_of_neighborhood_names][1]
-    # lower_bound = pi * (lower_radius) ** 2
+    # first, we want to figure out the unique neighborhoods in a list
+    index_mapping = {}
+    index = 0
 
-    avg_distances_to_cities = [math.inf]
-    for set_of_neighborhood_names in data:
-        if neighborhood_name in set_of_neighborhood_names:
-            avg_distances_to_cities.append(data[set_of_neighborhood_names][1])
-    upper_radius = min(avg_distances_to_cities)
-    upper_bound = math.pi * (upper_radius) ** 2
+    print(data_dict)
 
-    return upper_bound
+    for key in data_dict:
+        if key[0] not in index_mapping:
+            index_mapping[key[0]] = index
+            index += 1
+        if key[1] not in index_mapping:
+            index_mapping[key[1]] = index
+            index += 1
 
+    # print(index_mapping)
+    # assert 'Palm Beach' in index_mapping
+    # now, we want to initialize an np array
+    size = len(index_mapping)
+    array = np.zeros((size, size))
+    # print(array)
 
-# def
+    for key in data_dict:
+        # print(key)
+        distance = data_dict[key][1]
+        x = index_mapping[key[0]]
+        y = index_mapping[key[1]]
 
+        # print(f'{x}   {y}')
 
+        array[x][y] = distance
+        array[y][x] = distance
+
+    return array
+
+    # def
 if __name__ == '__main__':
     # print(read_csv('data/large_test.csv'))
-    print(estimate_neighborhood_size("Sunnyside", get_avg_times_and_miles(
-        read_csv('data/My Uber Drives - 2016.csv'))))
+    # print(computations.estimate_neighborhood_size("Sunnyside", get_avg_times_and_miles(
+    #     read_csv('data/My Uber Drives - 2016.csv'))))
 
     # print(get_avg_times_and_miles(read_csv('data/My Uber Drives - 2016.csv')))
+
+    np.set_printoptions(threshold=np.inf)
+    print(data_to_np(get_avg_times_and_miles(
+        read_csv('data/My Uber Drives - 2016.csv'))))
 
     # TODO: Path propagation
