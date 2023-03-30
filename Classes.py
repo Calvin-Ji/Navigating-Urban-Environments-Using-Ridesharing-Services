@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import networkx as nx
+import ReadData
 
 
 def create_graph(data: list[tuple[float, str, str, float]]) -> nx.Graph:
@@ -27,7 +28,7 @@ def create_graph(data: list[tuple[float, str, str, float]]) -> nx.Graph:
 
 
 def visualize(graph: nx.Graph) -> None:
-    """"
+    """
     Plot the graph using networkx and matplotlib.pyplot
     """
     nx.draw_networkx(graph)
@@ -42,6 +43,9 @@ if __name__ == '__main__':
     ]
     g = create_graph(ex_data)
     visualize(g)
+
+    data = ReadData.read_csv("data/small_test.csv")
+    calculated_data = ReadData.get_avg_times_and_miles(data)
 
 
 # class nxGraph:

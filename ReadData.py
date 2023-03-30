@@ -1,5 +1,6 @@
 import datetime
-from math import pi, inf #This is for the estimate size function - Calvin
+import math  # This is for the estimate size function - Calvin
+
 
 def read_csv(file_name: str) -> list[tuple[float, str, str, float]]:
     """ Reads the csv file and returns a list of tuples of (time, start_loc, stop_loc, distance)
@@ -28,13 +29,9 @@ def read_csv(file_name: str) -> list[tuple[float, str, str, float]]:
         if start_loc != stop_loc and start_loc != 'Unknown Location' and stop_loc != 'Unknown Location':
             # converting the times to datetimes
 
-            # print(start_time)
             temp = start_time.split()
-            # print(temp)
             date_params = temp[0].split('/')
-            # print(date_params)
             time_params = temp[1].split(':')
-            # print(time_params)
 
             start_datetime = datetime.datetime(
                 int(date_params[2]), int(date_params[0]), int(date_params[1]), int(time_params[0]), int(time_params[1]))
@@ -51,7 +48,6 @@ def read_csv(file_name: str) -> list[tuple[float, str, str, float]]:
             trip_data.append(
                 (time_delta.total_seconds(), start_loc, stop_loc, float(distance)))
 
-            # print(time_delta)
     return trip_data
 
 
@@ -93,30 +89,42 @@ def get_avg_times_and_miles(l: list[tuple[float, str, str, float]]) -> dict[tupl
     return final_dict
 
 
-def estimate_county_size(county_name: str, data: dict[tuple[str]:list[float]]) -> float:
-    """Make a very rough estimate of of the county size in miles squared and return it.
-    We can first assume that the county is a perfect sphere and assume that on average that the start
-    location is in the middle of the county. We could find the average distance 
+def estimate_neighborhood_size(neighborhood_name: str, data: dict[tuple[str]:list[float]]) -> float:
+    """
+    Make a very rough estimate of of the neighborhood size in miles squared and return it.
+    We can first assume that the neighborhood is a perfect circle and assume that on average that the start
+    location is in the middle of the neighborhood. We could find the average distance 
     from the city whose area we are trying to approximate to every other city that it is connected to. 
     We take the smallest average distance because presumably that would be the closest city that is 
-    nearby, and that could be a guess for our radius."""
+    nearby, and that could be a guess for our radius.
+
+    Preconditions:
+    - any(neighborhood_name in pair for pair in data)  # neighborhood_name exists in data
+    """
     # lower_radius = 0
-    # for set_of_county_names in data:
-    #     if set_of_county_names == (county_name, county_name):
-    #         lower_radius = data[set_of_county_names][1]
+    # for set_of_neighborhood_names in data:
+    #     if set_of_neighborhood_names == (neighborhood_name, neighborhood_name):
+    #         lower_radius = data[set_of_neighborhood_names][1]
     # lower_bound = pi * (lower_radius) ** 2
 
-    avg_distances_to_cities = [inf]
-    for set_of_county_names in data:
-        if county_name in set_of_county_names and set_of_county_names != (county_name, county_name):
-            avg_distances_to_cities.append(data[set_of_county_names][1])
+    avg_distances_to_cities = [math.inf]
+    for set_of_neighborhood_names in data:
+        if neighborhood_name in set_of_neighborhood_names:
+            avg_distances_to_cities.append(data[set_of_neighborhood_names][1])
     upper_radius = min(avg_distances_to_cities)
-    upper_bound = pi * (upper_radius) ** 2
+    upper_bound = math.pi * (upper_radius) ** 2
 
     return upper_bound
 
 
+# def
+
 
 if __name__ == '__main__':
-    #print(read_csv('data/large_test.csv'))
-    print(estimate_county_size("Midtown", get_avg_times_and_miles(read_csv('data/My Uber Drives - 2016.csv'))))
+    # print(read_csv('data/large_test.csv'))
+    print(estimate_neighborhood_size("Sunnyside", get_avg_times_and_miles(
+        read_csv('data/My Uber Drives - 2016.csv'))))
+
+    # print(get_avg_times_and_miles(read_csv('data/My Uber Drives - 2016.csv')))
+
+    # TODO: Path propagation
