@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import networkx as nx
 import read_data
+import numpy as np
+import scipy
 
 
 def create_graph(data: list[tuple[float, str, str, float]]) -> nx.Graph:
@@ -47,6 +49,50 @@ if __name__ == '__main__':
     data = read_data.read_csv("data/small_test.csv")
     calculated_data = read_data.get_avg_times_and_miles(data)
 
+
+def find_coordinates(distances: list[list[int]]) -> np.array:
+    """
+    Distances represents an n x n matrix.
+    Each row in the list is an object
+    is a python list with distances to other points as its elements
+
+    Example:
+    >>> dist = [
+    >>>    [0, 1, 2],  # object A
+    >>>    [1, 0, 3],  # object B
+    >>>    [2, 3, 0]   # object C
+    >>> ]
+
+    Notice that the diagonals will always be 0, since the distance from a point to itself is always 0
+    Distance from object A to object B is equal to dist[0][1],
+    Distance from object A to object C is equal to dist[0][2],
+    Distance from object B to object C is equal to dist[1][2],
+    etc.
+
+    Given this matrix, find the coordinates of all the objects
+
+    Preconditions:
+    - all(distances[n][n] == 0 for n in range(len(distances)))
+    """
+    matrix = np.array(distances)
+    mds = scipy.MDS(n_components=2, dissimilarity='precomputed')
+    coordinates = mds.fit_transform(matrix)
+
+    return coordinates
+
+
+def plot_points(coordinates: np.array, graph: nx.Graph) -> None:
+    """
+    Given the coordinates of the points, plot them on a networkx graph and return this graph
+    """
+    positions = {}
+    i = 0
+
+    for node in graph.nodes:
+        positions[node] = coordinates[i]
+        i += 1
+
+    nx.draw_networkx(graph, positions, with_labels=True)
 
 # class nxGraph:
 #     """
