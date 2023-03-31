@@ -2,6 +2,7 @@ import datetime
 import math  # This is for the estimate size function - Calvin
 import computations
 import numpy as np
+from classes import Network
 
 
 def read_csv(file_name: str) -> list[tuple[float, str, str, float]]:
@@ -93,12 +94,19 @@ def get_avg_times_and_miles(l: list[tuple[float, str, str, float]]) -> dict[tupl
 
 def data_to_np(data_dict: dict[tuple[str, str]: list[float]]) -> np.array:
     """
-      0 1 2 3 4
+    Return a numpy array where the numbers along the diagonal are all 0,
+    the other numbers represent the distances from an object to another object
+
+
+      0 1 2 3 4 -> columns
     0 0 d d d d
     1 d 0 d d d
     2 d d 0 d d
     3 d d d 0 d
     4 d d d d 0
+    ^
+    |
+    rows
     """
     # first, we want to figure out the unique neighborhoods in a list
     index_mapping = {}
@@ -133,6 +141,8 @@ def data_to_np(data_dict: dict[tuple[str, str]: list[float]]) -> np.array:
         array[y][x] = distance
 
     return array
+
+
 
     # def
 if __name__ == '__main__':
