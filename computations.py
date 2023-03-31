@@ -1,5 +1,5 @@
 import math
-from classes import Neighborhood, Link, Network
+from Classes import Neighborhood, Link, Network
 import numpy as np
 from sklearn.manifold import MDS
 import networkx as nx
@@ -109,6 +109,17 @@ def find_shortest_path_dijsktras(network: Network, start: str, stop: str) -> tup
 
     if not network.is_connected(start, stop):
         return (0.0, [])
+    
+    visited_neighborhoods = set()
+    unvisited_neighborhoods = set()
+    shortest_distances = {}
+
+    for n in network.to_list()[0]:
+        unvisited_neighborhoods.add(network.get_neighborhood(n))
+        shortest_distances[n] = [math.inf, None]
+    
+    shortest_distances[start] = [0, None]
+
     
     
 
