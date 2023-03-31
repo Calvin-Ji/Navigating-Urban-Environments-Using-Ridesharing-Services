@@ -12,4 +12,4 @@ def run_find_shortest_path_every_neighborhood() -> None:
     
 
 if __name__ == '__main__':
-    run()
+    run_find_shortest_path_every_neighborhood()

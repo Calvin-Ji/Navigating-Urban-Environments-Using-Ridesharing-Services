@@ -123,6 +123,7 @@ class Link:
         """  
         return (self.endpoints - {neighborhood}).pop() 
 
+
 class Network:  # graph
     """A network of Neighborhood(s) connected by Links"""
     # Private Instance Attributes:
@@ -215,6 +216,12 @@ class Network:  # graph
             n1 = self._neighborhoods[neighborhood1]
             return n1.check_connected(neighborhood2, set())
         return False
+
+    def get_neighborhood(self, name: str) -> Neighborhood:
+        """ Returns the neighborhood object corresponding to the name of the neighborhood
+        """
+        return self._neighborhoods[name]
+
     
 # Helper functions
 def compute_path_distance(path: list[Link]) -> float:
