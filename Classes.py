@@ -9,7 +9,7 @@ By: Dharma Ong, Gerald Wang, Mark Estiller, Calvin Ji
 # import numpy as np
 # import scipy
 from __future__ import annotations
-
+from typing import Callable
 
 class Neighborhood:
     """
@@ -48,6 +48,39 @@ class Neighborhood:
         """
         return f'Neighborhood({self.name})'
     
+    def find_all_possible_paths(self, end: str, visited: set[str]) -> list[list[Link]]:
+        """Helper method 1 - Returns all possible paths. Each path is represented by a list of links.
+        """
+        if self.name == end:
+            return [[]]
+    
+        all_paths = []  
+        new_visited = visited.union({self})  
+        for link in list(self.links.values()):  
+            path_so_far = [link]  
+            if link.get_other_endpoint(self) not in visited:  
+                paths = link.get_other_endpoint(self).find_all_possible_paths(end, new_visited)  
+                for path in paths:  
+                    path_so_far.extend(path)
+                    all_paths.append(path_so_far)  
+                    path_so_far = [link]  
+        return all_paths
+
+
+    def check_connected(self, target_name: str, visited: set[Neighborhood]) -> bool:
+        if self.name == target_name:
+            return True
+        
+        visited.add(self)
+        for u in self.links:
+            neighboring = self.links[u].get_other_endpoint(self)
+            if neighboring not in visited:
+                if neighboring.check_connected(target_name, visited):
+                    return True
+
+        return False
+
+
 class Link:
     """
     A link between 2 neighborhoods
@@ -58,8 +91,11 @@ class Link:
     Representation Invariants:
     - len(endpoints) == 2
     """
-    endpoints: set[Neighborhood]
-
+    endpoints: set[Neighborhood]    
+    distance: float
+    time: float
+    cost: float
+    
     def __init__(self, neighborhood1: Neighborhood, neighborhood2: Neighborhood) -> None:
         """
         Iniitalize a link between 2 neighborhoods
@@ -88,12 +124,9 @@ class Link:
         return (self.endpoints - {neighborhood}).pop() 
 
 class Network:  # graph
-    """
-    A network of Neighborhood(s) connected by Links
-
-    Private Instance Attributes:
-        - _nodes: a mapping from names of the neighborhoods to the Neighborhood in this network
-    """
+    """A network of Neighborhood(s) connected by Links"""
+    # Private Instance Attributes:
+    #    - _nodes: a mapping from names of the neighborhoods to the Neighborhood in this network
         
     _neighborhoods: dict[str, Neighborhood]
 
@@ -140,9 +173,72 @@ class Network:  # graph
     
         return (neighborhoods, sizes)
     
+    def find_best_path_for_key(self, end: str, visited: set[str], key: Callable) -> list[str]:
+        """Finds the best path for a certain variable, either time, distance, or cost, given a starting point and end point. The path score is defined 
+        as either the total distance, the total time taken, or the total cost (adding up every weighted link in the path depending on the key) 
+        from the starting point to the end point, and we are trying to minimize the path score
+        Preconditions:
+        - key in {compute_path_distance, compute_path_time, compute_path_cost}
+        """
+        # Accumulates every possible path 
+        all_possible_paths = self.find_all_possible_paths(end, visited)
 
+        # Computes its corresponding path scores (distance/time/cost)
+        all_possible_path_scores = [key(path) for path in all_possible_paths]
 
+        # Retrieves the minimum path score
+        minimum_path_score = min(all_possible_path_scores)
+
+        # Obtains the path that corresponds to the minimum path score
+        for i in range(0, len(all_possible_path_scores)):
+            if all_possible_path_scores[i] ==  minimum_path_score:
+                return all_possible_paths[i]
+        
+        # This should never happen but this is to prevent a python TA error
+        return []
     
+    # Helper method for above method
+    def find_all_possible_paths(self, start: str, end: str, visited: set[str]) -> list[list[Link]]:
+        """Return a list of all paths in this graph between start and end. 
+ 
+        Preconditions: 
+            - start in self._neighborhoods 
+            - end in self._neighborhoods
+        """
+        start_node = self._nodes[start]
+        return start_node.find_paths(end, set())
+
+    def is_connected(self, neighborhood1: str, neighborhood2: str) -> bool:
+        """
+        """
+        if neighborhood1 in self._neighborhoods and neighborhood2 in self._neighborhoods:
+            n1 = self._neighborhoods[neighborhood1]
+            return n1.check_connected(neighborhood2, set())
+        return False
+    
+# Helper functions
+def compute_path_distance(path: list[Link]) -> float:
+    """Returns the path score by adding every distance in the path's weighted links."""
+    path_score_so_far = 0
+    for link in path:
+        path_score_so_far += link.distance
+    return path_score_so_far
+
+def compute_path_time(path: list[Link]) -> float:
+    """Returns the path score by adding every time taken in the path's weighted links."""
+    path_score_so_far = 0
+    for link in path:
+        path_score_so_far += link.time
+    return path_score_so_far
+
+def compute_path_cost(path: list[Link]) -> float:
+    """Returns the path score by adding every cost in the path's weighted links."""
+    path_score_so_far = 0
+    for link in path:
+        path_score_so_far += link.cost
+    return path_score_so_far
+
+
 if __name__ == '__main__':
     import doctest
     doctest.testmod(verbose=True)

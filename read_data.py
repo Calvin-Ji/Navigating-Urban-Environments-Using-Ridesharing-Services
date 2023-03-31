@@ -2,7 +2,7 @@ import datetime
 import math  # This is for the estimate size function - Calvin
 import computations
 import numpy as np
-from classes import Network
+from classes import Neighborhood, Link, Network
 
 
 def read_csv(file_name: str) -> list[tuple[float, str, str, float]]:
@@ -91,6 +91,26 @@ def get_avg_times_and_miles(l: list[tuple[float, str, str, float]]) -> dict[tupl
         final_dict[(start, stop)] += [avg_miles]
     return final_dict
 
+def get_avg_costs(d: dict[tuple[str, str]:list[float]]) -> dict[tuple[str, str]:float]:
+    """Calculates the average cost to get from one neighbourhood to another neighborhood.
+    Returns a dictionary with the endpoints as keys and the average cost as its corresponding values."""
+    new_dict = {}
+    base_fare = 1.55
+    safe_rides_fee = 1.00
+    for endpoints in d:
+        new_dict[endpoints] = base_fare + 0.20*(d[endpoints][0]/60) + 1.20*(d[endpoints][1]) + safe_rides_fee
+    return new_dict
+        
+def create_graph_from_read_csv(d: dict[tuple[str, str]:list[float]]) -> Network:
+    """Generates and returns a network, given a tuple consisting of the neighborhood endpoints as keys,
+    with its average time at index 0 and average distance at index 1."""
+    network = Network()
+    
+    for endpoints in d:
+        network.add_link(endpoints[0], endpoints[1])
+
+    return network
+
 
 def data_to_np(data_dict: dict[tuple[str, str]: list[float]]) -> np.array:
     """
@@ -141,7 +161,7 @@ def data_to_np(data_dict: dict[tuple[str, str]: list[float]]) -> np.array:
         array[y][x] = distance
 
     return array
-
+    
 
 
     # def
