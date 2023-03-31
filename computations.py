@@ -51,7 +51,7 @@ def find_shortest_path_every_neighborhood(self, end: str, visited: set[str]) -> 
     all_possible_paths = find_all_possible_paths(end, visited)
 
     # Filters out every path that does not go through every node, and computes its corresponding path scores
-    all_possible_paths_every_neighborhood = [path for path in all_possible_paths if len(path) == len(self._neighborhood)]
+    all_possible_paths_every_neighborhood = [path for path in all_possible_paths if len(path) == len(self._neighborhood) - 1]
     all_possible_path_scores_every_neighborhood = [compute_path_score(path) for path in all_possible_paths_every_neighborhood]
 
     # Retrieves the minimum path score
