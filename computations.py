@@ -17,12 +17,6 @@ def estimate_neighborhood_size(neighborhood_name: str, data: dict[tuple[str]:lis
     Preconditions:
     - any(neighborhood_name in pair for pair in data)  # neighborhood_name exists in data
     """
-    # lower_radius = 0
-    # for set_of_neighborhood_names in data:
-    #     if set_of_neighborhood_names == (neighborhood_name, neighborhood_name):
-    #         lower_radius = data[set_of_neighborhood_names][1]
-    # lower_bound = pi * (lower_radius) ** 2
-
     avg_distances_to_cities = [math.inf]
     for set_of_neighborhood_names in data:
         if neighborhood_name in set_of_neighborhood_names:
@@ -32,76 +26,52 @@ def estimate_neighborhood_size(neighborhood_name: str, data: dict[tuple[str]:lis
 
     return upper_bound
 
+def get_avg_times_and_miles(l: list[tuple[float, str, str, float]]) -> dict[tuple[str, str]:list[float]]:
+    """Return a dictionary where a set of 2 endpoints are keys and the list containing the
+    average time at index 0 and average distance at index 1."""
+    # A mapping of the endpoints to time
+    links_so_far_with_times = {}
+    # A mapping of the endpoints to distance
+    links_so_far_with_miles = {}
+    final_dict = {}
+    for data in l:
+        # Get all the times
+        if f'{data[1]}:{data[2]}' not in links_so_far_with_times:
+            links_so_far_with_times[f'{data[1]}:{data[2]}'] = [data[0]]
+        else:
+            links_so_far_with_times[f'{data[1]}:{data[2]}'] += [data[0]]
+        # Get all the distances
+        if f'{data[1]}:{data[2]}' not in links_so_far_with_miles:
+            links_so_far_with_miles[f'{data[1]}:{data[2]}'] = [data[3]]
+        else:
+            links_so_far_with_miles[f'{data[1]}:{data[2]}'] += [data[3]]
 
+    for item in links_so_far_with_times:
+        avg_time = sum(
+            links_so_far_with_times[item]) / len(links_so_far_with_times[item])
+        listy = item.split(':')
+        start = listy[0]
+        stop = listy[1]
+        final_dict[(start, stop)] = [avg_time]
 
-# DO NOT TOUCH THESE THINGS!!!!!!!!!!!!
-#################################################################################
-#################################################################################
-################################################################################# 
+    for item in links_so_far_with_miles:
+        avg_miles = sum(
+            links_so_far_with_miles[item]) / len(links_so_far_with_miles[item])
+        listy = item.split(':')
+        start = listy[0]
+        stop = listy[1]
+        final_dict[(start, stop)] += [avg_miles]
+    return final_dict
 
-# # We will assume that we have the GRAPH already, and probably place this inside the graph class
-# def find_shortest_path_every_neighborhood(self, end: str, visited: set[str]) -> list[str]:
-#     """
-#     Finds the shortest path that traverses every neighbourhood, given a starting point and 
-#     end point. The path score is defined as the total distance (adding up every weighted links) 
-#     from the starting point
-#     to the end point.
-#     """
-#     # Accumulates every possible path 
-#     all_possible_paths = find_all_possible_paths(end, visited)
-
-#     # Filters out every path that does not go through every node, and computes its corresponding path scores
-#     all_possible_paths_every_neighborhood = [path for path in all_possible_paths]
-#     all_possible_path_scores_every_neighborhood = [compute_path_score(path) for path in all_possible_paths_every_neighborhood]
-
-#     # Retrieves the minimum path score
-#     minimum_path_score = min(all_possible_path_scores_every_neighborhood)
-
-#     # Obtains the path that corresponds to the minimum path score
-#     for i in range(0, len(all_possible_path_scores_every_neighborhood)):
-#         if all_possible_path_scores_every_neighborhood[i] ==  minimum_path_score:
-#             return all_possible_paths_every_neighborhood[i]
-    
-#     # This should never happen but this is to prevent a python TA error
-#     return []
-
-
-# # This is a node method
-# def find_all_possible_paths(self, end: str, visited: set[str]) -> list[list[Link]]:
-#     """Helper method 1 - Returns all possible paths. Each path is represented by a list of links.
-#     """
-#     if self.name == end:
-#         return [[]]
-  
-#     all_paths = []  
-#     new_visited = visited.union({self})  
-#     for link in list(self.links.values()):  
-#         path_so_far = [link]  
-#         if link.get_other_endpoint(self) not in visited:  
-#             paths = link.get_other_endpoint(self).find_all_possible_paths(end, new_visited)  
-#             for path in paths:  
-#                 path_so_far.extend(path)
-#                 all_paths.append(path_so_far)  
-#                 path_so_far = [link]  
-#     return all_paths
-
-# #This is a graph method
-# def find_all_possible_paths(self, start: str, end: str, visited: set[str]) -> list[list[Link]]:
-#     start_node = self._nodes[start]
-#     return start_node.find_paths(end, set())
-
-
-# def compute_path_score(path: list[Link]) -> float:
-#     """Returns the path score by adding every distance in the path's weighted links."""
-#     path_score_so_far = 0
-#     for link in path:
-#         path_score_so_far += link.path_score
-#     return path_score_so_far
-
-    
-#################################################################################
-#################################################################################
-################################################################################# 
+def get_avg_costs(d: dict[tuple[str, str]:list[float]]) -> dict[tuple[str, str]:float]:
+    """Calculates the average cost to get from one neighbourhood to another neighborhood.
+    Returns a dictionary with the endpoints as keys and the average cost as its corresponding values."""
+    new_dict = {}
+    base_fare = 1.55
+    safe_rides_fee = 1.00
+    for endpoints in d:
+        new_dict[endpoints] = base_fare + 0.20*(d[endpoints][0]/60) + 1.20*(d[endpoints][1]) + safe_rides_fee
+    return new_dict 
 
 def find_shortest_path_dijsktras(network: Network, start: str, stop: str) -> tuple(float, list[str]):
     """ Return the shortest path and its distance between the start neighborhood and the stop neighborhood using Dijsktra's algorithm

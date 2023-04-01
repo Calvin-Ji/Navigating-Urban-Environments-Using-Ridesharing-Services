@@ -1,7 +1,7 @@
 """
 CSC111 Winter 2023 Course Project
 
-By: Dharma Ong, Gerald Wang, Mark Estiller, Calvin Ji
+By: Gerald Wang, Mark Estiller, Calvin Ji, Dharma Ong
 """
 # import matplotlib.pyplot as plt
 # import networkx as nx
@@ -136,6 +136,13 @@ class Network:  # graph
         Initialize an empty network
         """
         self._neighborhoods = {}
+
+    def initialize_sizes(self) -> None:
+        """
+        """
+        visited = set()
+        for _, v in self._neighborhoods:
+            
     
     def add_neighborhood(self, name: str) -> Neighborhood:
         """

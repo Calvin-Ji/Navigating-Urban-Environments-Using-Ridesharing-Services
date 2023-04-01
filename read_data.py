@@ -54,53 +54,6 @@ def read_csv(file_name: str) -> list[tuple[float, str, str, float]]:
     return trip_data
 
 
-def get_avg_times_and_miles(l: list[tuple[float, str, str, float]]) -> dict[tuple[str, str]:list[float]]:
-    """Return a dictionary where a set of 2 endpoints are keys and the list containing the
-    average time at index 0 and average distance at index 1."""
-    # A mapping of the endpoints to time
-    links_so_far_with_times = {}
-    # A mapping of the endpoints to distance
-    links_so_far_with_miles = {}
-    final_dict = {}
-    for data in l:
-        # Get all the times
-        if f'{data[1]}:{data[2]}' not in links_so_far_with_times:
-            links_so_far_with_times[f'{data[1]}:{data[2]}'] = [data[0]]
-        else:
-            links_so_far_with_times[f'{data[1]}:{data[2]}'] += [data[0]]
-        # Get all the distances
-        if f'{data[1]}:{data[2]}' not in links_so_far_with_miles:
-            links_so_far_with_miles[f'{data[1]}:{data[2]}'] = [data[3]]
-        else:
-            links_so_far_with_miles[f'{data[1]}:{data[2]}'] += [data[3]]
-
-    for item in links_so_far_with_times:
-        avg_time = sum(
-            links_so_far_with_times[item]) / len(links_so_far_with_times[item])
-        listy = item.split(':')
-        start = listy[0]
-        stop = listy[1]
-        final_dict[(start, stop)] = [avg_time]
-
-    for item in links_so_far_with_miles:
-        avg_miles = sum(
-            links_so_far_with_miles[item]) / len(links_so_far_with_miles[item])
-        listy = item.split(':')
-        start = listy[0]
-        stop = listy[1]
-        final_dict[(start, stop)] += [avg_miles]
-    return final_dict
-
-def get_avg_costs(d: dict[tuple[str, str]:list[float]]) -> dict[tuple[str, str]:float]:
-    """Calculates the average cost to get from one neighbourhood to another neighborhood.
-    Returns a dictionary with the endpoints as keys and the average cost as its corresponding values."""
-    new_dict = {}
-    base_fare = 1.55
-    safe_rides_fee = 1.00
-    for endpoints in d:
-        new_dict[endpoints] = base_fare + 0.20*(d[endpoints][0]/60) + 1.20*(d[endpoints][1]) + safe_rides_fee
-    return new_dict
-        
 def create_graph_from_read_csv(d: dict[tuple[str, str]:list[float]]) -> Network:
     """Generates and returns a network, given a tuple consisting of the neighborhood endpoints as keys,
     with its average time at index 0 and average distance at index 1."""
@@ -162,9 +115,6 @@ def data_to_np(data_dict: dict[tuple[str, str]: list[float]]) -> np.array:
 
     return array
     
-
-
-    # def
 if __name__ == '__main__':
     # print(read_csv('data/large_test.csv'))
     # print(computations.estimate_neighborhood_size("Sunnyside", get_avg_times_and_miles(
@@ -172,8 +122,9 @@ if __name__ == '__main__':
 
     # print(get_avg_times_and_miles(read_csv('data/My Uber Drives - 2016.csv')))
 
-    np.set_printoptions(threshold=np.inf)
-    print(data_to_np(get_avg_times_and_miles(
-        read_csv('data/My Uber Drives - 2016.csv'))))
+    # np.set_printoptions(threshold=np.inf)
+    # print(data_to_np(get_avg_times_and_miles(
+    #     read_csv('data/My Uber Drives - 2016.csv'))))
 
     # TODO: Path propagation
+    pass
