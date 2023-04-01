@@ -1,5 +1,5 @@
 import math
-from Classes import Neighborhood, Link, Network
+from classes import Neighborhood, Link, Network
 import numpy as np
 from sklearn.manifold import MDS
 import networkx as nx
@@ -28,11 +28,12 @@ def estimate_neighborhood_size(neighborhood_name: str, data: dict[tuple[str]:lis
 
 def get_avg_times_and_miles(l: list[tuple[float, str, str, float]]) -> dict[tuple[str, str]:list[float]]:
     """Return a dictionary where a set of 2 endpoints are keys and the list containing the
-    average time at index 0 and average distance at index 1."""
+    average time at index 0, average distance at index 1, and average cost at index 2"""
     # A mapping of the endpoints to time
     links_so_far_with_times = {}
     # A mapping of the endpoints to distance
     links_so_far_with_miles = {}
+
     final_dict = {}
     for data in l:
         # Get all the times
@@ -72,6 +73,21 @@ def get_avg_costs(d: dict[tuple[str, str]:list[float]]) -> dict[tuple[str, str]:
     for endpoints in d:
         new_dict[endpoints] = base_fare + 0.20*(d[endpoints][0]/60) + 1.20*(d[endpoints][1]) + safe_rides_fee
     return new_dict 
+
+def combine_dict_times_miles_cost(avg_times_and_miles: dict[tuple[str, str]:list[float]], \
+    avg_costs: dict[tuple[str, str]:float]) -> dict[tuple[str, str]:list[float]]:
+    """Mutates and returns the dictionary containing the times and miles values to also include costs.""" 
+    for endpoints in avg_costs:
+        avg_times_and_miles[endpoints].append(avg_costs[endpoints])
+    
+    return avg_times_and_miles
+
+# def assign_link_distances(network: Network) -> Network:
+
+# def assign_link_times(network: Network) -> Network:
+
+# def assign_link_costs(network: Network) -> Network:
+
 
 def find_shortest_path_dijsktras(network: Network, start: str, stop: str) -> tuple(float, list[str]):
     """ Return the shortest path and its distance between the start neighborhood and the stop neighborhood using Dijsktra's algorithm
