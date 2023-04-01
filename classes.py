@@ -121,7 +121,10 @@ class Link:
         Preconditions: 
             - neighborhood in self.endpoints 
         """  
-        return (self.endpoints - {neighborhood}).pop() 
+        return (self.endpoints - {neighborhood}).pop()
+
+    def get_endpoints(self) -> set[Neighborhood]:
+        return endpoints
 
 
 class Network:  # graph
@@ -140,8 +143,27 @@ class Network:  # graph
     def initialize_sizes(self) -> None:
         """
         """
-        visited = set()
+        average_distance_dict = {}
+
         for _, v in self._neighborhoods:
+            avg_dist = sum(link.distance for name, link in v.links)/len(v.links)
+            average_distance_dict[v] = avg_dist
+        
+        # now we want to take the median and divide it
+
+        recalculated_dict = {}
+        links_list = []
+
+        for _, v in self._neighborhoods:
+            for name, link in v.links:
+                links_list.append(link)
+                
+            median = links_list[int(len(links_list)/2)]
+            v.size = median.distance * (average_distance_dict[v.name]/(average_distance_dict[v.name] + average_distance_dict[name]))
+            
+
+
+
             
     
     def add_neighborhood(self, name: str) -> Neighborhood:
@@ -165,6 +187,7 @@ class Network:  # graph
             self.add_neighborhood(n2)
 
         Link(self._neighborhoods[n1], self._neighborhoods[n2])
+
 
     def to_list(self) -> tuple[list[str], list[float]]:
         """
