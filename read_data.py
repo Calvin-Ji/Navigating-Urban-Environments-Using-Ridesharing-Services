@@ -56,11 +56,13 @@ def read_csv(file_name: str) -> list[tuple[float, str, str, float]]:
 
 def create_graph_from_read_csv(d: dict[tuple[str, str]:list[float]]) -> Network:
     """Generates and returns a network, given a tuple consisting of the neighborhood endpoints as keys,
-    with its average time at index 0 and average distance at index 1."""
+    with its corresponidng average time at index 0,average distance at index 1, and average cost at index 2."""
     network = Network()
-    
+
     for endpoints in d:
-        network.add_link(endpoints[0], endpoints[1])
+        selected_endpoints = d[endpoints]
+        network.add_link(endpoints[0], endpoints[1],
+                         selected_endpoints[0], selected_endpoints[1], selected_endpoints[2])
 
     return network
 
@@ -114,7 +116,8 @@ def data_to_np(data_dict: dict[tuple[str, str]: list[float]]) -> np.array:
         array[y][x] = distance
 
     return array
-    
+
+
 if __name__ == '__main__':
     # print(read_csv('data/large_test.csv'))
     # print(computations.estimate_neighborhood_size("Sunnyside", get_avg_times_and_miles(

@@ -11,6 +11,7 @@ By: Gerald Wang, Mark Estiller, Calvin Ji, Dharma Ong
 from __future__ import annotations
 from typing import Callable
 
+
 class Neighborhood:
     """
     A neighborhood in the network
@@ -19,7 +20,7 @@ class Neighborhood:
     - name: 
         the name of this neighborhood
     - links:
-        A mapping that contains the links of this node
+        A mapping that contains the lin ks of this node
         Each key represents the name of the other neighborhoods connected by this node
         The corresponding value is the link leading to that neighborhood
     - size:
@@ -32,7 +33,7 @@ class Neighborhood:
     name: str
     links: dict[str, Link]
     size: float
-    
+
     def __init__(self, name: str) -> None:
         """
         Initialize a neighborhood without any neighbors yet.
@@ -47,30 +48,30 @@ class Neighborhood:
         Return a string representation of this neighborhood
         """
         return f'Neighborhood({self.name})'
-    
-    def find_all_possible_paths(self, end: str, visited: set[str]) -> list[list[Link]]:
+
+    def find_all_possible_paths(self, end: str, visited: set[Neighborhood]) -> list[list[Link]]:
         """Helper method 1 - Returns all possible paths. Each path is represented by a list of links.
         """
         if self.name == end:
             return [[]]
-    
-        all_paths = []  
-        new_visited = visited.union({self})  
-        for link in list(self.links.values()):  
-            path_so_far = [link]  
-            if link.get_other_endpoint(self) not in visited:  
-                paths = link.get_other_endpoint(self).find_all_possible_paths(end, new_visited)  
-                for path in paths:  
-                    path_so_far.extend(path)
-                    all_paths.append(path_so_far)  
-                    path_so_far = [link]  
-        return all_paths
 
+        all_paths = []
+        new_visited = visited.union({self})
+        for link in list(self.links.values()):
+            path_so_far = [link]
+            if link.get_other_endpoint(self) not in visited:
+                paths = link.get_other_endpoint(
+                    self).find_all_possible_paths(end, new_visited)
+                for path in paths:
+                    path_so_far.extend(path)
+                    all_paths.append(path_so_far)
+                    path_so_far = [link]
+        return all_paths
 
     def check_connected(self, target_name: str, visited: set[Neighborhood]) -> bool:
         if self.name == target_name:
             return True
-        
+
         visited.add(self)
         for u in self.links:
             neighboring = self.links[u].get_other_endpoint(self)
@@ -91,14 +92,14 @@ class Link:
     Representation Invariants:
     - len(endpoints) == 2
     """
-    endpoints: set[Neighborhood]    
+    endpoints: set[Neighborhood]
     distance: float
     time: float
     cost: float
-    
-    def __init__(self, neighborhood1: Neighborhood, neighborhood2: Neighborhood) -> None:
+
+    def __init__(self, neighborhood1: Neighborhood, neighborhood2: Neighborhood, distance: float, time: float, cost: float) -> None:
         """
-        Iniitalize a link between 2 neighborhoods
+        Iniitalize a link between 2 neighborhoods.
 
         Preconditions:
         - neighborhood1 != neighborhood2
@@ -107,6 +108,9 @@ class Link:
         self.endpoints = {neighborhood1, neighborhood2}
         neighborhood1.links[neighborhood2.name] = self
         neighborhood2.links[neighborhood1.name] = self
+        self.distance = distance
+        self.time = time
+        self.cost = cost
 
     def __repr__(self) -> str:
         """
@@ -114,24 +118,24 @@ class Link:
         """
         endpoints = list(self.endpoints)
         return f'Links({endpoints[0]}, {endpoints[1]})'
-    
-    def get_other_endpoint(self, neighborhood: Neighborhood) -> Neighborhood:  
+
+    def get_other_endpoint(self, neighborhood: Neighborhood) -> Neighborhood:
         """Return the endpoint of this link that is not equal to the given neighborhood. 
- 
+
         Preconditions: 
             - neighborhood in self.endpoints 
-        """  
+        """
         return (self.endpoints - {neighborhood}).pop()
 
     def get_endpoints(self) -> set[Neighborhood]:
-        return endpoints
+        return self.endpoints
 
 
 class Network:  # graph
     """A network of Neighborhood(s) connected by Links"""
     # Private Instance Attributes:
     #    - _nodes: a mapping from names of the neighborhoods to the Neighborhood in this network
-        
+
     _neighborhoods: dict[str, Neighborhood]
 
     def __init__(self) -> None:
@@ -146,30 +150,26 @@ class Network:  # graph
         average_distance_dict = {}
 
         for _, v in self._neighborhoods:
-            avg_dist = sum(link.distance for name, link in v.links)/len(v.links)
+            avg_dist = sum(link.distance for name,
+                           link in v.links)/len(v.links)
             average_distance_dict[v] = avg_dist
-        
+
         # now we want to take the median and divide it
 
-        recalculated_dict = {}
         links_list = []
 
         for _, v in self._neighborhoods:
             for name, link in v.links:
                 links_list.append(link)
-                
+
             median = links_list[int(len(links_list)/2)]
-            v.size = median.distance * (average_distance_dict[v.name]/(average_distance_dict[v.name] + average_distance_dict[name]))
-            
+            v.size = median.distance * (average_distance_dict[v.name]/(
+                average_distance_dict[v.name] + average_distance_dict[name]))
 
-
-
-            
-    
     def add_neighborhood(self, name: str) -> Neighborhood:
         """
         Add a neighborhood into this network class and return it
-        
+
         Preconditions:
         - name not in self._nodes
         """
@@ -177,17 +177,18 @@ class Network:  # graph
         self._neighborhoods[name] = new
         return new
 
-    def add_link(self, n1: str, n2: str) -> None:
+    def add_link(self, n1: str, n2: str, distance: float, time: float, cost: float) -> None:
         """
-        Add a link between 2 neighborhoods in the network
+        Add a link between 2 neighborhoods in the network.
+        This method also initializes the distance, time, and cost attributes for Link!
         """
         if n1 not in self._neighborhoods:
             self.add_neighborhood(n1)
         if n2 not in self._neighborhoods:
             self.add_neighborhood(n2)
 
-        Link(self._neighborhoods[n1], self._neighborhoods[n2])
-
+        Link(self._neighborhoods[n1],
+             self._neighborhoods[n2], distance, time, cost)
 
     def to_list(self) -> tuple[list[str], list[float]]:
         """
@@ -197,22 +198,39 @@ class Network:  # graph
         """
         neighborhoods = []
         sizes = []
-    
+
         for neighborhood in self._neighborhoods:
             neighborhoods.append(neighborhood)
             sizes.append(self._neighborhoods[neighborhood].size)
-    
+
         return (neighborhoods, sizes)
-    
-    def find_best_path_for_key(self, end: str, visited: set[str], key: Callable) -> list[str]:
+
+    # def initialize_distances(self, d: dict[tuple[str, str]:list[float]]) -> None:
+    #     """
+    #     Assigns every link in the network with its corresponding distances
+    #     """
+    #     for endpoints in d:
+    #         if set(endpoints) in
+
+    # def initialize_times(self, d: dict[tuple[str, str]:list[float]]) -> None:
+    #     """
+    #     Assigns every link in the network with its corresponding times
+    #     """
+
+    # def initialize_costs(self, d: dict[tuple[str, str]:list[float]]) -> None:
+    #     """
+    #     Assigns every link in the network with its corresponding costs
+    #     """
+
+    def find_best_path_for_key(self, start: str, end: str, key: Callable) -> list[Link]:
         """Finds the best path for a certain variable, either time, distance, or cost, given a starting point and end point. The path score is defined 
         as either the total distance, the total time taken, or the total cost (adding up every weighted link in the path depending on the key) 
         from the starting point to the end point, and we are trying to minimize the path score
         Preconditions:
         - key in {compute_path_distance, compute_path_time, compute_path_cost}
         """
-        # Accumulates every possible path 
-        all_possible_paths = self.find_all_possible_paths(end, visited)
+        # Accumulates every possible path
+        all_possible_paths = self.find_all_possible_paths(start, end)
 
         # Computes its corresponding path scores (distance/time/cost)
         all_possible_path_scores = [key(path) for path in all_possible_paths]
@@ -222,16 +240,16 @@ class Network:  # graph
 
         # Obtains the path that corresponds to the minimum path score
         for i in range(0, len(all_possible_path_scores)):
-            if all_possible_path_scores[i] ==  minimum_path_score:
+            if all_possible_path_scores[i] == minimum_path_score:
                 return all_possible_paths[i]
-        
+
         # This should never happen but this is to prevent a python TA error
         return []
-    
+
     # Helper method for above method
-    def find_all_possible_paths(self, start: str, end: str, visited: set[str]) -> list[list[Link]]:
+    def find_all_possible_paths(self, start: str, end: str) -> list[list[Link]]:
         """Return a list of all paths in this graph between start and end. 
- 
+
         Preconditions: 
             - start in self._neighborhoods 
             - end in self._neighborhoods
@@ -252,8 +270,18 @@ class Network:  # graph
         """
         return self._neighborhoods[name]
 
-    
-# Helper functions
+    def get_all_links(self) -> set[Link]:
+        """
+        """
+        set_of_links = {}
+
+        for n in self._neighborhoods.values():
+            for link in n.links.values():
+                set_of_links.add(link)
+
+        return set_of_links
+
+
 def compute_path_distance(path: list[Link]) -> float:
     """Returns the path score by adding every distance in the path's weighted links."""
     path_score_so_far = 0
@@ -261,12 +289,14 @@ def compute_path_distance(path: list[Link]) -> float:
         path_score_so_far += link.distance
     return path_score_so_far
 
+
 def compute_path_time(path: list[Link]) -> float:
     """Returns the path score by adding every time taken in the path's weighted links."""
     path_score_so_far = 0
     for link in path:
         path_score_so_far += link.time
     return path_score_so_far
+
 
 def compute_path_cost(path: list[Link]) -> float:
     """Returns the path score by adding every cost in the path's weighted links."""
@@ -290,7 +320,6 @@ if __name__ == '__main__':
         'disable': ['E9992', 'E9997']
     })
 
-
     # ex_data = [
     #     (50, 'n1', 'n2', 1),
     #     (60, 'n3', 'n3', 3),
@@ -303,12 +332,9 @@ if __name__ == '__main__':
     # calculated_data = read_data.get_avg_times_and_miles(data)
 
 
-
-
 ##################################################
 # Disregard code below
 ##################################################
-
 
 
 # def create_graph(data: list[tuple[float, str, str, float]]) -> nx.Graph:
@@ -338,8 +364,6 @@ if __name__ == '__main__':
 #     plt.show()
 
 
-
-    
 # if __name__ == '__main__':
 #     ex_data = [
 #         (50, 'n1', 'n2', 1),

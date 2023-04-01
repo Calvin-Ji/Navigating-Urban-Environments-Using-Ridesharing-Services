@@ -26,6 +26,7 @@ def estimate_neighborhood_size(neighborhood_name: str, data: dict[tuple[str]:lis
 
     return upper_bound
 
+
 def get_avg_times_and_miles(l: list[tuple[float, str, str, float]]) -> dict[tuple[str, str]:list[float]]:
     """Return a dictionary where a set of 2 endpoints are keys and the list containing the
     average time at index 0, average distance at index 1, and average cost at index 2"""
@@ -64,6 +65,7 @@ def get_avg_times_and_miles(l: list[tuple[float, str, str, float]]) -> dict[tupl
         final_dict[(start, stop)] += [avg_miles]
     return final_dict
 
+
 def get_avg_costs(d: dict[tuple[str, str]:list[float]]) -> dict[tuple[str, str]:float]:
     """Calculates the average cost to get from one neighbourhood to another neighborhood.
     Returns a dictionary with the endpoints as keys and the average cost as its corresponding values."""
@@ -71,15 +73,17 @@ def get_avg_costs(d: dict[tuple[str, str]:list[float]]) -> dict[tuple[str, str]:
     base_fare = 1.55
     safe_rides_fee = 1.00
     for endpoints in d:
-        new_dict[endpoints] = base_fare + 0.20*(d[endpoints][0]/60) + 1.20*(d[endpoints][1]) + safe_rides_fee
-    return new_dict 
+        new_dict[endpoints] = base_fare + 0.20 * \
+            (d[endpoints][0]/60) + 1.20*(d[endpoints][1]) + safe_rides_fee
+    return new_dict
 
-def combine_dict_times_miles_cost(avg_times_and_miles: dict[tuple[str, str]:list[float]], \
-    avg_costs: dict[tuple[str, str]:float]) -> dict[tuple[str, str]:list[float]]:
-    """Mutates and returns the dictionary containing the times and miles values to also include costs.""" 
+
+def combine_dict_times_miles_cost(avg_times_and_miles: dict[tuple[str, str]:list[float]],
+                                  avg_costs: dict[tuple[str, str]:float]) -> dict[tuple[str, str]:list[float]]:
+    """Mutates and returns the dictionary containing the times and miles values to also include costs."""
     for endpoints in avg_costs:
         avg_times_and_miles[endpoints].append(avg_costs[endpoints])
-    
+
     return avg_times_and_miles
 
 # def assign_link_distances(network: Network) -> Network:
@@ -91,11 +95,18 @@ def combine_dict_times_miles_cost(avg_times_and_miles: dict[tuple[str, str]:list
 
 def find_shortest_path_dijsktras(network: Network, start: str, stop: str) -> tuple(float, list[str]):
     """ Return the shortest path and its distance between the start neighborhood and the stop neighborhood using Dijsktra's algorithm
+
+    >>> network = Network()
+    >>> network.add_link('A', 'B')
+    >>> network.add_link('B', 'C')
+    >>> network.add_link('C', 'D')
+    >>> network.add_link('D', 'A')
+
     """
 
     if not network.is_connected(start, stop):
         return (0.0, [])
-    
+
     visited_neighborhoods = set()
     unvisited_neighborhoods = set()
     shortest_distances = {}
@@ -103,7 +114,7 @@ def find_shortest_path_dijsktras(network: Network, start: str, stop: str) -> tup
     for n in network.to_list()[0]:
         unvisited_neighborhoods.add(network.get_neighborhood(n))
         shortest_distances[n] = [math.inf, None]
-    
+
     shortest_distances[start] = [0, None]
 
     # start searching
@@ -113,26 +124,27 @@ def find_shortest_path_dijsktras(network: Network, start: str, stop: str) -> tup
     while unvisited_neighborhoods != set():
         # temporary variables used to determine which node to look at next
         next_node = None
-        path_cost = math.inf
+        # path_cost = math.inf
 
         node_cost_so_far = shortest_distances[current_node.name][0]
         assert node_cost_so_far != math.inf
 
         for link in current_node.links:
             other_node = link.get_other_endpoint(current_node)
-            node_cost = node_cost_so_far + link.cost
+            other_node_cost = node_cost_so_far + link.cost
 
-            if node_cost < shortest_distances[other_node.name][0] and other_node not in visited_neighborhoods:
-                shortest_distances[other_node.name] = [node_cost, current_node]
+            if other_node_cost < shortest_distances[other_node.name][0] and other_node not in visited_neighborhoods:
+                shortest_distances[other_node.name] = [
+                    other_node_cost, current_node]
 
-            if link.cost < next_node_cost and other_node not in visited_neighborhoods:
+            if link.cost < other_node_cost and other_node not in visited_neighborhoods:
                 next_node = other_node
-                path_cost = link.cost
-        
+                node_cost_so_far = other_node_cost
+
         visited_neighborhoods.add(current_node)
         unvisited_neighborhoods.remove(current_node)
         current_node = next_node
-    
+
     assert unvisited_neighborhoods == set()
 
     # reconstruct the path and return
@@ -146,7 +158,7 @@ def find_shortest_path_dijsktras(network: Network, start: str, stop: str) -> tup
         path.insert(0, next_name)
         next_name = prev_node.name
         prev_node = shortest_distances[next_name][1]
-    
+
     return (distance, path)
 
 
