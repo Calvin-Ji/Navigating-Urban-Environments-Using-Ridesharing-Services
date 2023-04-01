@@ -1,3 +1,14 @@
+"""
+CSC111 Winter 2023 Course Project
+
+By: Gerald Wang, Mark Estiller, Calvin Ji, Dharma Ong
+
+This file contains functions that will read the dataset and output it in a format
+that can be used for the computations
+"""
+
+
+from __future__ import annotations
 import datetime
 import math  # This is for the estimate size function - Calvin
 import computations
@@ -54,9 +65,12 @@ def read_csv(file_name: str) -> list[tuple[float, str, str, float]]:
     return trip_data
 
 
-def create_graph_from_read_csv(d: dict[tuple[str, str]:list[float]]) -> Network:
-    """Generates and returns a network, given a tuple consisting of the neighborhood endpoints as keys,
-    with its corresponidng average time at index 0,average distance at index 1, and average cost at index 2."""
+def create_graph_from_read_csv(d: dict[tuple[str, str], list[float]]) -> Network:
+    """
+    Generates and returns a network, given a tuple consisting of the neighborhood endpoints as keys,
+    with its corresponidng average time at index 0,average distance at index 1, and average cost at index 2.
+    """
+
     network = Network()
 
     for endpoints in d:
@@ -67,67 +81,6 @@ def create_graph_from_read_csv(d: dict[tuple[str, str]:list[float]]) -> Network:
     return network
 
 
-def data_to_np(data_dict: dict[tuple[str, str]: list[float]]) -> np.array:
-    """
-    Return a numpy array where the numbers along the diagonal are all 0,
-    the other numbers represent the distances from an object to another object
-
-
-      0 1 2 3 4 -> columns
-    0 0 d d d d
-    1 d 0 d d d
-    2 d d 0 d d
-    3 d d d 0 d
-    4 d d d d 0
-    ^
-    |
-    rows
-    """
-    # first, we want to figure out the unique neighborhoods in a list
-    index_mapping = {}
-    index = 0
-
-    print(data_dict)
-
-    for key in data_dict:
-        if key[0] not in index_mapping:
-            index_mapping[key[0]] = index
-            index += 1
-        if key[1] not in index_mapping:
-            index_mapping[key[1]] = index
-            index += 1
-
-    # print(index_mapping)
-    # assert 'Palm Beach' in index_mapping
-    # now, we want to initialize an np array
-    size = len(index_mapping)
-    array = np.zeros((size, size))
-    # print(array)
-
-    for key in data_dict:
-        # print(key)
-        distance = data_dict[key][1]
-        x = index_mapping[key[0]]
-        y = index_mapping[key[1]]
-
-        # print(f'{x}   {y}')
-
-        array[x][y] = distance
-        array[y][x] = distance
-
-    return array
-
-
 if __name__ == '__main__':
-    # print(read_csv('data/large_test.csv'))
-    # print(computations.estimate_neighborhood_size("Sunnyside", get_avg_times_and_miles(
-    #     read_csv('data/My Uber Drives - 2016.csv'))))
 
-    # print(get_avg_times_and_miles(read_csv('data/My Uber Drives - 2016.csv')))
-
-    # np.set_printoptions(threshold=np.inf)
-    # print(data_to_np(get_avg_times_and_miles(
-    #     read_csv('data/My Uber Drives - 2016.csv'))))
-
-    # TODO: Path propagation
     pass

@@ -1,11 +1,22 @@
+"""
+CSC111 Winter 2023 Course Project
+
+By: Gerald Wang, Mark Estiller, Calvin Ji, Dharma Ong
+
+This file contains the function to run the entire project
+"""
+
+
+from __future__ import annotations
 import read_data
-import classes
+from classes import Neighborhood, Link, Network
 import computations
+
 
 # Test graph to see if find shortest path works
 
 
-def run_find_best_path_for_key() -> list:
+def run_find_best_path_for_key() -> list[Link]:
     data = read_data.read_csv("data/large_test.csv")
 
     # Accumulates the average times, miles, and costs
@@ -20,12 +31,9 @@ def run_find_best_path_for_key() -> list:
     generated_graph = read_data.create_graph_from_read_csv(
         combined_dict_times_miles_cost)
 
-    # generated_graph.initialize_distances()
-    # generated_graph.initialize_times()
-    # generated_graph.initialize_costs()
-
-    generated_graph.find_best_path_for_key(
+    best_path = generated_graph.find_best_path_for_key(
         'Fort Pierce', 'Downtown', computations.compute_path_distance)  # end neighborhood, set
+    return best_path
 
 
 if __name__ == '__main__':

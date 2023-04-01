@@ -2,14 +2,14 @@
 CSC111 Winter 2023 Course Project
 
 By: Gerald Wang, Mark Estiller, Calvin Ji, Dharma Ong
+
+This file contains a collection of Python classes and functions that will be used to represent a
+network in North Carolina
 """
-# import matplotlib.pyplot as plt
-# import networkx as nx
-# import read_data
-# import numpy as np
-# import scipy
+
 from __future__ import annotations
 from typing import Callable
+import math
 
 
 class Neighborhood:
@@ -29,6 +29,7 @@ class Neighborhood:
 
     Representation Invariants:
     - self.name not in self.links
+    - self.size >= 0
     """
     name: str
     links: dict[str, Link]
@@ -40,7 +41,7 @@ class Neighborhood:
         The size of the neighborhood will be set to 0
         """
         self.name = name
-        self.neighbors = {}
+        self.links = {}
         self.size = 0.0
 
     def __repr__(self) -> str:
@@ -50,7 +51,22 @@ class Neighborhood:
         return f'Neighborhood({self.name})'
 
     def find_all_possible_paths(self, end: str, visited: set[Neighborhood]) -> list[list[Link]]:
-        """Helper method 1 - Returns all possible paths. Each path is represented by a list of links.
+        """
+        Helper method 1 - Returns all possible paths. Each path is represented by a list of links.
+        >>> network = Network()
+        >>> network.add_link('A', 'B', 5.0, 10.0, 10.0)
+        >>> network.add_link('B', 'C', 10.0, 5.0, 10.0)   
+        >>> network.add_link('C', 'D', 10.0, 10.0, 10.0)
+        >>> network.add_link('D', 'E', 10.0, 10.0, 8.0)   
+        >>> network.add_link('E', 'F', 10.0, 10.0, 10.0)
+        >>> network.add_link('F', 'A', 10.0, 10.0, 10.0)   
+        >>> network.find_best_path_for_key('A', 'D', compute_path_time)
+        [network._neighborhoods['A'].links['B'], network._neighborhoods['B'].links['C'], network._neighborhoods['C'].links['D']]
+        >>> network.find_best_path_for_key('A', 'D', compute_path_distance)
+        [network._neighborhoods['A'].links['B'], network._neighborhoods['B'].links['C'], network._neighborhoods['C'].links['D']]  
+        >>> network.find_best_path_for_key('A', 'D', compute_path_cost)
+        [network._neighborhoods['F'].links['A'], network._neighborhoods['E'].links['F'], network._neighborhoods['D'].links['E']]
+
         """
         if self.name == end:
             return [[]]
@@ -68,7 +84,24 @@ class Neighborhood:
                     path_so_far = [link]
         return all_paths
 
+        # all_paths = []
+        # new_visited = visited.union({self})
+        # for channel in list(self.channels.values()):
+        #     path_so_far = [channel]
+        #     if channel.get_other_endpoint(self) not in visited:
+        #         paths = channel.get_other_endpoint(
+        #             self).find_paths(destination, new_visited)
+        #         for path in paths:
+        #             path_so_far.extend(path)
+        #             all_paths.append(path_so_far)
+        #             path_so_far = [channel]
+        # return all_paths
+
     def check_connected(self, target_name: str, visited: set[Neighborhood]) -> bool:
+        """
+        Check whether this neighborhood is connected to the target_name neighborhood
+        """
+
         if self.name == target_name:
             return True
 
@@ -88,18 +121,25 @@ class Link:
 
     Instance attributes:
     - endpoints: the 2 neighborhoods that are connected by this link
+    - time: the time taken to go from one endpoint to the other
+    - distance: the distance from one endpoint to the other
+    - cost: the cost from one endpoint to another
 
     Representation Invariants:
-    - len(endpoints) == 2
+    - len(self.endpoints) == 2
+    - self.time >= 0
+    - self.distance >= 0
+    - self.cost >= 0
     """
     endpoints: set[Neighborhood]
-    distance: float
     time: float
+    distance: float
     cost: float
 
-    def __init__(self, neighborhood1: Neighborhood, neighborhood2: Neighborhood, distance: float, time: float, cost: float) -> None:
+    def __init__(self, neighborhood1: Neighborhood, neighborhood2: Neighborhood, time: float, distance: float, cost: float) -> None:
         """
-        Iniitalize a link between 2 neighborhoods.
+        Iniitalize a link between 2 neighborhoods. This link contains information about the 
+        time, distance, and cost to go from the first neighborhood to the second
 
         Preconditions:
         - neighborhood1 != neighborhood2
@@ -108,8 +148,8 @@ class Link:
         self.endpoints = {neighborhood1, neighborhood2}
         neighborhood1.links[neighborhood2.name] = self
         neighborhood2.links[neighborhood1.name] = self
-        self.distance = distance
         self.time = time
+        self.distance = distance
         self.cost = cost
 
     def __repr__(self) -> str:
@@ -120,7 +160,8 @@ class Link:
         return f'Links({endpoints[0]}, {endpoints[1]})'
 
     def get_other_endpoint(self, neighborhood: Neighborhood) -> Neighborhood:
-        """Return the endpoint of this link that is not equal to the given neighborhood. 
+        """
+        Return the endpoint of this link that is not equal to the given neighborhood. 
 
         Preconditions: 
             - neighborhood in self.endpoints 
@@ -128,6 +169,9 @@ class Link:
         return (self.endpoints - {neighborhood}).pop()
 
     def get_endpoints(self) -> set[Neighborhood]:
+        """
+        Return the endpoints in this link
+        """
         return self.endpoints
 
 
@@ -146,25 +190,29 @@ class Network:  # graph
 
     def initialize_sizes(self) -> None:
         """
+        Initializes the sizes of every neighborhood in the network
         """
         average_distance_dict = {}
 
-        for _, v in self._neighborhoods:
-            avg_dist = sum(link.distance for name,
-                           link in v.links)/len(v.links)
+        for v in self._neighborhoods.values():
+            avg_dist = sum(
+                lk.distance for lk in v.links.values()) / len(v.links)
             average_distance_dict[v] = avg_dist
 
         # now we want to take the median and divide it
 
         links_list = []
 
-        for _, v in self._neighborhoods:
-            for name, link in v.links:
+        for v in self._neighborhoods.values():
+            for link in v.links.values():
                 links_list.append(link)
 
-            median = links_list[int(len(links_list)/2)]
-            v.size = median.distance * (average_distance_dict[v.name]/(
-                average_distance_dict[v.name] + average_distance_dict[name]))
+            median = links_list[int(len(links_list) // 2)]
+            other_node = median.get_other_endpoint(v)
+            radius = median.distance * (average_distance_dict[v.name] / (
+                average_distance_dict[v.name] + average_distance_dict[other_node.name]))
+
+            v.size = math.pi * (radius ** 2)
 
     def add_neighborhood(self, name: str) -> Neighborhood:
         """
@@ -177,10 +225,11 @@ class Network:  # graph
         self._neighborhoods[name] = new
         return new
 
-    def add_link(self, n1: str, n2: str, distance: float, time: float, cost: float) -> None:
+    def add_link(self, n1: str, n2: str, time: float, distance: float, cost: float) -> None:
         """
         Add a link between 2 neighborhoods in the network.
-        This method also initializes the distance, time, and cost attributes for Link!
+        This method also initializes the distance, time, and cost attributes for Link
+        Return this link
         """
         if n1 not in self._neighborhoods:
             self.add_neighborhood(n1)
@@ -188,7 +237,7 @@ class Network:  # graph
             self.add_neighborhood(n2)
 
         Link(self._neighborhoods[n1],
-             self._neighborhoods[n2], distance, time, cost)
+             self._neighborhoods[n2], time, distance, cost)
 
     def to_list(self) -> tuple[list[str], list[float]]:
         """
@@ -205,29 +254,29 @@ class Network:  # graph
 
         return (neighborhoods, sizes)
 
-    # def initialize_distances(self, d: dict[tuple[str, str]:list[float]]) -> None:
-    #     """
-    #     Assigns every link in the network with its corresponding distances
-    #     """
-    #     for endpoints in d:
-    #         if set(endpoints) in
-
-    # def initialize_times(self, d: dict[tuple[str, str]:list[float]]) -> None:
-    #     """
-    #     Assigns every link in the network with its corresponding times
-    #     """
-
-    # def initialize_costs(self, d: dict[tuple[str, str]:list[float]]) -> None:
-    #     """
-    #     Assigns every link in the network with its corresponding costs
-    #     """
-
     def find_best_path_for_key(self, start: str, end: str, key: Callable) -> list[Link]:
-        """Finds the best path for a certain variable, either time, distance, or cost, given a starting point and end point. The path score is defined 
-        as either the total distance, the total time taken, or the total cost (adding up every weighted link in the path depending on the key) 
-        from the starting point to the end point, and we are trying to minimize the path score
+        """
+        Finds the best path for a certain variable, either time, distance, or cost, given a starting point and end point. 
+        The path score is defined as either the total distance, the total time taken, or the total cost 
+        (adding up every weighted link in the path depending on the key) from the starting point to the end point,
+        and we are trying to minimize the path score
+
         Preconditions:
-        - key in {compute_path_distance, compute_path_time, compute_path_cost}
+        - key in {compute_path_time, compute_path_distance, compute_path_cost}
+
+        >>> network = Network()
+        >>> network.add_link('A', 'B', 5.0, 10.0, 10.0)
+        >>> network.add_link('B', 'C', 10.0, 5.0, 10.0)   
+        >>> network.add_link('C', 'D', 10.0, 10.0, 10.0)
+        >>> network.add_link('D', 'E', 10.0, 10.0, 8.0)   
+        >>> network.add_link('E', 'F', 10.0, 10.0, 10.0)
+        >>> network.add_link('F', 'A', 10.0, 10.0, 10.0)   
+        >>> network.find_best_path_for_key('A', 'D', compute_path_time)
+        [Links(Neighborhood(A), Neighborhood(B)), Links(Neighborhood(B), Neighborhood(C)), Links(Neighborhood(C), Neighborhood(D))]
+        >>> network.find_best_path_for_key('A', 'D', compute_path_distance)
+        [Links(Neighborhood(A), Neighborhood(B)), Links(Neighborhood(B), Neighborhood(C)), Links(Neighborhood(C), Neighborhood(D))]  
+        >>> network.find_best_path_for_key('A', 'D', compute_path_cost)
+        [Links(Neighborhood(F), Neighborhood(A)), Links(Neighborhood(F), Neighborhood(E)), Links(Neighborhood(D), Neighborhood(E))]
         """
         # Accumulates every possible path
         all_possible_paths = self.find_all_possible_paths(start, end)
@@ -254,11 +303,13 @@ class Network:  # graph
             - start in self._neighborhoods 
             - end in self._neighborhoods
         """
-        start_node = self._nodes[start]
-        return start_node.find_paths(end, set())
+        start_neighborhood = self._neighborhoods[start]
+        return start_neighborhood.find_all_possible_paths(end, set())
 
     def is_connected(self, neighborhood1: str, neighborhood2: str) -> bool:
         """
+        Return True if neighborhood1 and neighborhood2 are connected
+        Return False otherwise
         """
         if neighborhood1 in self._neighborhoods and neighborhood2 in self._neighborhoods:
             n1 = self._neighborhoods[neighborhood1]
@@ -266,14 +317,16 @@ class Network:  # graph
         return False
 
     def get_neighborhood(self, name: str) -> Neighborhood:
-        """ Returns the neighborhood object corresponding to the name of the neighborhood
+        """ 
+        Returns the neighborhood object corresponding to the name of the neighborhood
         """
         return self._neighborhoods[name]
 
     def get_all_links(self) -> set[Link]:
         """
+        Get a set of all the links in this network
         """
-        set_of_links = {}
+        set_of_links = set()
 
         for n in self._neighborhoods.values():
             for link in n.links.values():
@@ -282,24 +335,33 @@ class Network:  # graph
         return set_of_links
 
 
-def compute_path_distance(path: list[Link]) -> float:
-    """Returns the path score by adding every distance in the path's weighted links."""
-    path_score_so_far = 0
-    for link in path:
-        path_score_so_far += link.distance
-    return path_score_so_far
-
-
 def compute_path_time(path: list[Link]) -> float:
-    """Returns the path score by adding every time taken in the path's weighted links."""
+    """
+    Returns the path score by adding every time taken in the path's weighted links.
+    The path's score is the total time taken
+    """
     path_score_so_far = 0
     for link in path:
         path_score_so_far += link.time
     return path_score_so_far
 
 
+def compute_path_distance(path: list[Link]) -> float:
+    """
+    Returns the path score by adding every distance in the path's weighted links.
+    The path's score is the total distance
+    """
+    path_score_so_far = 0
+    for link in path:
+        path_score_so_far += link.distance
+    return path_score_so_far
+
+
 def compute_path_cost(path: list[Link]) -> float:
-    """Returns the path score by adding every cost in the path's weighted links."""
+    """
+    Returns the path score by adding every cost in the path's weighted links.
+    The path's score is the total cost
+    """
     path_score_so_far = 0
     for link in path:
         path_score_so_far += link.cost
@@ -317,7 +379,8 @@ if __name__ == '__main__':
     import python_ta
     python_ta.check_all(config={
         'max-line-length': 120,
-        'disable': ['E9992', 'E9997']
+        'disable': ['E9992', 'E9997'],
+        'extra_imports': [math]
     })
 
     # ex_data = [

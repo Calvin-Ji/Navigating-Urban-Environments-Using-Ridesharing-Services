@@ -1,6 +1,7 @@
 """
-This python file 
+This python file helps visualize the network we've created
 """
+from __future__ import annotations
 from classes import Network
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -10,6 +11,9 @@ def convert_to_nx(graph: Network) -> nx.Graph:
     """
     This function converts our graph class into a networkx graph
     This way, we can visualize the graph
+
+    Preconditions:
+    - graph is a valid network
     """
     new = nx.Graph()
     links = graph.get_all_links()
