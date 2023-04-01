@@ -120,8 +120,48 @@ def find_shortest_path_dijsktras(network: Network, start: str, stop: str) -> tup
     
     shortest_distances[start] = [0, None]
 
+    # start searching
+
+    current_node = network.get_neighborhood(start)
+
+    while unvisited_neighborhoods != set():
+        # temporary variables used to determine which node to look at next
+        next_node = None
+        path_cost = math.inf
+
+        node_cost_so_far = shortest_distances[current_node.name][0]
+        assert node_cost_so_far != math.inf
+
+        for link in current_node.links:
+            other_node = link.get_other_endpoint(current_node)
+            node_cost = node_cost_so_far + link.cost
+
+            if node_cost < shortest_distances[other_node.name][0] and other_node not in visited_neighborhoods:
+                shortest_distances[other_node.name] = [node_cost, current_node]
+
+            if link.cost < next_node_cost and other_node not in visited_neighborhoods:
+                next_node = other_node
+                path_cost = link.cost
+        
+        visited_neighborhoods.add(current_node)
+        unvisited_neighborhoods.remove(current_node)
+        current_node = next_node
     
+    assert unvisited_neighborhoods == set()
+
+    # reconstruct the path and return
+    distance = shortest_distances[stop][0]
+
+    path = []
+    next_name = stop
+    prev_node = shortest_distances[next_name][1]
+
+    while prev_node is not None:
+        path.insert(0, next_name)
+        next_name = prev_node.name
+        prev_node = shortest_distances[next_name][1]
     
+    return (distance, path)
 
 
 def find_coordinates(distances: list[list[int]]) -> np.array:
