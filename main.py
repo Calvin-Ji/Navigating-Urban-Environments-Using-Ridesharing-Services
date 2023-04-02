@@ -148,7 +148,7 @@ if __name__ == '__main__':
 
     print(run_find_best_path_for_time_dijsktra())
     print(run_find_best_path_for_distance_dijsktra())
-    print(run_find_best_path_for__dijsktra())
+    print(run_find_best_path_for_cost_dijsktra())
 
 
 
