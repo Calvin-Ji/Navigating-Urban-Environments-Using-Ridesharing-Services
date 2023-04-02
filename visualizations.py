@@ -39,15 +39,16 @@ def display_graph(nx_graph: nx.Graph) -> None:
     >>> nx_graph = convert_to_nx(network)
     >>> display_graph(nx_graph)
     """
-    pos = nx.spring_layout(nx_graph, seed=7)
 
-    nx.draw_networkx_nodes(nx_graph, pos, node_size=700)
-    nx.draw_networkx_edges(nx_graph, pos, width=6)
-    nx.draw_networkx_labels(nx_graph, pos, font_size=20,
+    pos = nx.spring_layout(nx_graph, k=3.0, seed=7)
+    
+    nx.draw_networkx_nodes(nx_graph, pos, node_size=400)
+    nx.draw_networkx_edges(nx_graph, pos, width=3)
+    nx.draw_networkx_labels(nx_graph, pos, font_size=5,
                             font_family="sans-serif")
 
     edge_labels = nx.get_edge_attributes(nx_graph, "weight")
-    nx.draw_networkx_edge_labels(nx_graph, pos, edge_labels)
+    nx.draw_networkx_edge_labels(nx_graph, pos, edge_labels, font_size=5)
 
     ax = plt.gca()
     ax.margins(0.08)

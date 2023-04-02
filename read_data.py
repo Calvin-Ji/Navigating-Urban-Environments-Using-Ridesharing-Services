@@ -10,10 +10,10 @@ that can be used for the computations
 
 from __future__ import annotations
 import datetime
-import math  # This is for the estimate size function - Calvin
+# import math  # This is for the estimate size function - Calvin
 import computations
 import numpy as np
-from classes import Neighborhood, Link, Network
+from classes import Network # Neighborhood, Link, Network
 
 
 def read_csv(file_name: str) -> list[tuple[float, str, str, float]]:
