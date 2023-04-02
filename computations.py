@@ -7,7 +7,7 @@ This file contains the functions that are used for the main computations in this
 """
 from __future__ import annotations
 import math
-from classes import Network
+from classes import Neighborhood, Link, Network
 import numpy as np
 
 
@@ -74,7 +74,7 @@ def get_avg_times_and_miles(l: list[tuple[float, str, str, float]]) -> dict[tupl
     return final_dict
 
 
-def get_avg_costs(d: dict[tuple[str], list[float]]) -> dict[tuple[str], float]:
+def get_avg_costs(d: dict[tuple[str, str], list[float]]) -> dict[tuple[str, str], float]:
     """
     Calculates the average cost to get from one neighbourhood to another neighborhood.
     Returns a dictionary with the endpoints as keys and the average cost as its corresponding values.
@@ -83,9 +83,9 @@ def get_avg_costs(d: dict[tuple[str], list[float]]) -> dict[tuple[str], float]:
     new_dict = {}
     base_fare = 1.55
     safe_rides_fee = 1.00
+    assert isinstance(d, dict)
     for key in d:
-        new_dict[key] = base_fare + 0.20 * \
-            (d[key][0] * 1 / 60) + 1.20*(d[key][1]) + safe_rides_fee
+        new_dict[key] = base_fare + 0.20 * (d[key][0] * 1 / 60) + 1.20*(d[key][1]) + safe_rides_fee
     return new_dict
 
 
@@ -98,12 +98,6 @@ def combine_dict_times_miles_cost(avg_times_and_miles: dict[tuple[str], list[flo
         avg_times_and_miles[endpoints].append(avg_costs[endpoints])
 
     return avg_times_and_miles
-
-# def assign_link_distances(network: Network) -> Network:
-
-# def assign_link_times(network: Network) -> Network:
-
-# def assign_link_costs(network: Network) -> Network:
 
 
 def find_shortest_path_dijsktras(network: Network, start: str, stop: str, optimize: str) -> tuple[float, list[str]]:
@@ -191,6 +185,39 @@ def find_shortest_path_dijsktras(network: Network, start: str, stop: str, optimi
     path.insert(0, start)
 
     return (distance, path)
+
+def compute_path_time(path: list[Link]) -> float:
+    """
+    Returns the path score by adding every time taken in the path's weighted links.
+    The path's score is the total time taken
+    """
+    path_score_so_far = 0
+    for link in path:
+        path_score_so_far += link.time
+    return path_score_so_far
+
+
+def compute_path_distance(path: list[Link]) -> float:
+    """
+    Returns the path score by adding every distance in the path's weighted links.
+    The path's score is the total distance
+    """
+    path_score_so_far = 0
+    for link in path:
+        path_score_so_far += link.distance
+    return path_score_so_far
+
+
+def compute_path_cost(path: list[Link]) -> float:
+    """
+    Returns the path score by adding every cost in the path's weighted links.
+    The path's score is the total cost
+    """
+    path_score_so_far = 0
+    for link in path:
+        path_score_so_far += link.cost
+    return path_score_so_far
+
 
 # # def data_to_np(data_dict: dict[tuple[str, str], list[float]]) -> np.array:
 #     """

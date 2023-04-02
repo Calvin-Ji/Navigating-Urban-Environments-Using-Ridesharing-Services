@@ -53,20 +53,6 @@ class Neighborhood:
     def find_all_possible_paths(self, end: str, visited: set[Neighborhood]) -> list[list[Link]]:
         """
         Helper method 1 - Returns all possible paths. Each path is represented by a list of links.
-        >>> network = Network()
-        >>> network.add_link('A', 'B', 5.0, 10.0, 10.0)
-        >>> network.add_link('B', 'C', 10.0, 5.0, 10.0)   
-        >>> network.add_link('C', 'D', 10.0, 10.0, 10.0)
-        >>> network.add_link('D', 'E', 10.0, 10.0, 8.0)   
-        >>> network.add_link('E', 'F', 10.0, 10.0, 10.0)
-        >>> network.add_link('F', 'A', 10.0, 10.0, 10.0)   
-        >>> network.find_best_path_for_key('A', 'D', compute_path_time)
-        [network._neighborhoods['A'].links['B'], network._neighborhoods['B'].links['C'], network._neighborhoods['C'].links['D']]
-        >>> network.find_best_path_for_key('A', 'D', compute_path_distance)
-        [network._neighborhoods['A'].links['B'], network._neighborhoods['B'].links['C'], network._neighborhoods['C'].links['D']]  
-        >>> network.find_best_path_for_key('A', 'D', compute_path_cost)
-        [network._neighborhoods['F'].links['A'], network._neighborhoods['E'].links['F'], network._neighborhoods['D'].links['E']]
-
         """
         if self.name == end:
             return [[]]
@@ -83,19 +69,7 @@ class Neighborhood:
                     all_paths.append(path_so_far)
                     path_so_far = [link]
         return all_paths
-
-        # all_paths = []
-        # new_visited = visited.union({self})
-        # for channel in list(self.channels.values()):
-        #     path_so_far = [channel]
-        #     if channel.get_other_endpoint(self) not in visited:
-        #         paths = channel.get_other_endpoint(
-        #             self).find_paths(destination, new_visited)
-        #         for path in paths:
-        #             path_so_far.extend(path)
-        #             all_paths.append(path_so_far)
-        #             path_so_far = [channel]
-        # return all_paths
+    
 
     def check_connected(self, target_name: str, visited: set[Neighborhood]) -> bool:
         """
@@ -333,40 +307,6 @@ class Network:  # graph
                 set_of_links.add(link)
 
         return set_of_links
-
-
-def compute_path_time(path: list[Link]) -> float:
-    """
-    Returns the path score by adding every time taken in the path's weighted links.
-    The path's score is the total time taken
-    """
-    path_score_so_far = 0
-    for link in path:
-        path_score_so_far += link.time
-    return path_score_so_far
-
-
-def compute_path_distance(path: list[Link]) -> float:
-    """
-    Returns the path score by adding every distance in the path's weighted links.
-    The path's score is the total distance
-    """
-    path_score_so_far = 0
-    for link in path:
-        path_score_so_far += link.distance
-    return path_score_so_far
-
-
-def compute_path_cost(path: list[Link]) -> float:
-    """
-    Returns the path score by adding every cost in the path's weighted links.
-    The path's score is the total cost
-    """
-    path_score_so_far = 0
-    for link in path:
-        path_score_so_far += link.cost
-    return path_score_so_far
-
 
 if __name__ == '__main__':
     import doctest
