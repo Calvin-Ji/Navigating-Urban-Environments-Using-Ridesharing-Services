@@ -4,7 +4,18 @@ CSC111 Winter 2023 Course Project
 By: Gerald Wang, Mark Estiller, Calvin Ji, Dharma Ong
 
 This file contains a collection of Python classes and functions that will be used to represent a
-network in North Carolina
+network using neighborhoods found in the dataset. One of the calls to the core computations for this 
+project, which is about finding the best path to optimize certain variables (time, distance, cost), is 
+contained in this file. 
+
+Copyright and Usage Information
+===============================
+This file is Copyright (c) 2023 by Gerald Wang, Mark Estiller, Calvin Ji, Dharma Ong.
+This module is expected to use data from:
+https://www.kaggle.com/datasets/zusmani/uberdrives
+"My Uber Drives" by user Zeeshan-Ul-Hassan Usmani. The data encompassed his Uber drives primarily in North Carolina in 2016
+(1,175 drives total), and it was presented as a csv with the following columns going from left to right: start date, end date, 
+category, start, stop, number of miles, and purpose.
 """
 
 from __future__ import annotations
@@ -38,7 +49,7 @@ class Neighborhood:
     def __init__(self, name: str) -> None:
         """
         Initialize a neighborhood without any neighbors yet.
-        The size of the neighborhood will be set to 0
+        The size of the neighborhood will be set to 0.
         """
         self.name = name
         self.links = {}
@@ -52,7 +63,10 @@ class Neighborhood:
 
     def find_all_possible_paths(self, end: str, visited: set[Neighborhood]) -> list[list[Link]]:
         """
-        Helper method 1 - Returns all possible paths. Each path is represented by a list of links.
+        Returns all possible paths. Each path is represented by a list of links.
+
+        Preconditions:
+        - self not in visited
         """
         if self.name == end:
             return [[]]
@@ -74,6 +88,10 @@ class Neighborhood:
     def check_connected(self, target_name: str, visited: set[Neighborhood]) -> bool:
         """
         Check whether this neighborhood is connected to the target_name neighborhood
+
+        Preconditions:
+        - self.name != ''
+        - target_name != ''
         """
 
         if self.name == target_name:
@@ -97,7 +115,7 @@ class Link:
     - endpoints: the 2 neighborhoods that are connected by this link
     - time: the time taken to go from one endpoint to the other
     - distance: the distance from one endpoint to the other
-    - cost: the cost from one endpoint to another
+    - cost: the cost from one endpoint to the other
 
     Representation Invariants:
     - len(self.endpoints) == 2
@@ -110,14 +128,18 @@ class Link:
     distance: float
     cost: float
 
-    def __init__(self, neighborhood1: Neighborhood, neighborhood2: Neighborhood, time: float, distance: float, cost: float) -> None:
+    def __init__(self, neighborhood1: Neighborhood, neighborhood2: Neighborhood, 
+                 time: float, distance: float, cost: float) -> None:
         """
         Iniitalize a link between 2 neighborhoods. This link contains information about the 
-        time, distance, and cost to go from the first neighborhood to the second
+        time, distance, and cost to go from the first neighborhood to the second.
 
         Preconditions:
         - neighborhood1 != neighborhood2
         - there isn't already an existing link between the 2 neighborhoods
+        - time >= 0
+        - float >= 0
+        - cost >= 0
         """
         self.endpoints = {neighborhood1, neighborhood2}
         neighborhood1.links[neighborhood2.name] = self
@@ -144,15 +166,15 @@ class Link:
 
     def get_endpoints(self) -> set[Neighborhood]:
         """
-        Return the endpoints in this link
+        Return the endpoints in this link.
         """
         return self.endpoints
 
 
 class Network:  # graph
-    """A network of Neighborhood(s) connected by Links"""
+    """A network of Neighborhood(s) connected by Links."""
     # Private Instance Attributes:
-    #    - _nodes: a mapping from names of the neighborhoods to the Neighborhood in this network
+    #    - _nrighborhoods: a mapping from names of the neighborhoods to the Neighborhood in this network
 
     _neighborhoods: dict[str, Neighborhood]
 
@@ -162,31 +184,21 @@ class Network:  # graph
         """
         self._neighborhoods = {}
 
-    def initialize_sizes(self) -> None:
+    def initialize_test_sizes(self) -> None:
+        for n in self._neighborhoods.values():
+            links_list = list(n.links.values())
+            n.size = links_list[0].distance
+
+    def get_all_sizes(self) -> dict[str, float]:
         """
-        Initializes the sizes of every neighborhood in the network
         """
-        average_distance_dict = {}
+        size_dict = {}
 
-        for v in self._neighborhoods.values():
-            avg_dist = sum(
-                lk.distance for lk in v.links.values()) / len(v.links)
-            average_distance_dict[v] = avg_dist
+        for neighborhood in self._neighborhoods.values():
+            size_dict[neighborhood.name] = neighborhood.size
+        
+        return size_dict
 
-        # now we want to take the median and divide it
-
-        links_list = []
-
-        for v in self._neighborhoods.values():
-            for link in v.links.values():
-                links_list.append(link)
-
-            median = links_list[int(len(links_list) // 2)]
-            other_node = median.get_other_endpoint(v)
-            radius = median.distance * (average_distance_dict[v.name] / (
-                average_distance_dict[v.name] + average_distance_dict[other_node.name]))
-
-            v.size = math.pi * (radius ** 2)
 
     def add_neighborhood(self, name: str) -> Neighborhood:
         """
@@ -204,6 +216,13 @@ class Network:  # graph
         Add a link between 2 neighborhoods in the network.
         This method also initializes the distance, time, and cost attributes for Link
         Return this link
+
+        Preconditions:
+        - n1 != ''
+        - n2 != ''
+        - time >= 0
+        - distance >= 0
+        - cost >= 0
         """
         if n1 not in self._neighborhoods:
             self.add_neighborhood(n1)
@@ -230,12 +249,14 @@ class Network:  # graph
 
     def find_best_path_for_key(self, start: str, end: str, key: Callable) -> list[Link]:
         """
-        Finds the best path for a certain variable, either time, distance, or cost, given a starting point and end point. 
-        The path score is defined as either the total distance, the total time taken, or the total cost 
+        Finds the best path for a certain variable, either time, distance, or cost, given a starting point and 
+        end point. The path score is defined as either the total distance, the total time taken, or the total cost 
         (adding up every weighted link in the path depending on the key) from the starting point to the end point,
         and we are trying to minimize the path score
 
         Preconditions:
+        - start in self._neighborhoods
+        - end in self._neighborhoods
         - key in {compute_path_time, compute_path_distance, compute_path_cost}
 
         >>> network = Network()
@@ -274,8 +295,8 @@ class Network:  # graph
         """Return a list of all paths in this graph between start and end. 
 
         Preconditions: 
-            - start in self._neighborhoods 
-            - end in self._neighborhoods
+        - start in self._neighborhoods 
+        - end in self._neighborhoods
         """
         start_neighborhood = self._neighborhoods[start]
         return start_neighborhood.find_all_possible_paths(end, set())
@@ -284,6 +305,8 @@ class Network:  # graph
         """
         Return True if neighborhood1 and neighborhood2 are connected
         Return False otherwise
+        - neighborhood1 != ''
+        - neighborhood2 != ''
         """
         if neighborhood1 in self._neighborhoods and neighborhood2 in self._neighborhoods:
             n1 = self._neighborhoods[neighborhood1]
@@ -293,6 +316,9 @@ class Network:  # graph
     def get_neighborhood(self, name: str) -> Neighborhood:
         """ 
         Returns the neighborhood object corresponding to the name of the neighborhood
+
+        Preconditions:
+        - name in self._neighborhoods
         """
         return self._neighborhoods[name]
 
@@ -307,6 +333,16 @@ class Network:  # graph
                 set_of_links.add(link)
 
         return set_of_links
+    
+    def get_all_neighborhoods(self) -> set[Neighborhood]:
+        """
+        """
+        set_of_neighborhoods = set()
+
+        for n in self._neighborhoods.values():
+            set_of_neighborhoods.add(n)
+
+        return set_of_neighborhoods
 
 if __name__ == '__main__':
     import doctest
@@ -316,12 +352,19 @@ if __name__ == '__main__':
     # (In PyCharm, select the lines below and press Ctrl/Cmd + / to toggle comments.)
     # You can use "Run file in Python Console" to run PythonTA,
     # and then also test your methods manually in the console.
-    import python_ta
-    python_ta.check_all(config={
-        'max-line-length': 120,
-        'disable': ['E9992', 'E9997'],
-        'extra_imports': [math]
-    })
+    # import python_ta
+    # python_ta.check_all(config={
+    #     'max-line-length': 120,
+    #     'disable': ['E9992', 'E9997'],
+    #     'extra_imports': [math]
+    # })
+
+    # network = Network()
+    # network.add_link('A', 'B', 0, 9, 0)
+    # network.add_link('A', 'C', 0, 10, 0)
+    # network.add_link('A', 'D', 0, 11, 0)
+    # network.add_link('A', 'E', 0, 12, 0)
+    # print(network.get_neighborhood('A').size)
 
     # ex_data = [
     #     (50, 'n1', 'n2', 1),
@@ -333,74 +376,3 @@ if __name__ == '__main__':
 
     # data = read_data.read_csv("data/small_test.csv")
     # calculated_data = read_data.get_avg_times_and_miles(data)
-
-
-##################################################
-# Disregard code below
-##################################################
-
-
-# def create_graph(data: list[tuple[float, str, str, float]]) -> nx.Graph:
-#     """
-#     Create a networkx graph based on the data
-
-#     Preconditions:
-#     - data follows the format from the function header
-#     """
-#     g = nx.Graph()
-
-#     unique_neighborhoods = set()
-
-#     for item in data:
-#         if item[1] not in unique_neighborhoods:
-#             unique_neighborhoods.add(item[1])
-#         if item[2] not in unique_neighborhoods:
-#             unique_neighborhoods.add(item[2])
-#     # print(list(unique_neighborhoods))
-#     g.add_nodes_from(list(unique_neighborhoods))
-#     return g
-# def visualize(graph: nx.Graph) -> None:
-#     """
-#     Plot the graph using networkx and matplotlib.pyplot
-#     """
-#     nx.draw_networkx(graph)
-#     plt.show()
-
-
-# if __name__ == '__main__':
-#     ex_data = [
-#         (50, 'n1', 'n2', 1),
-#         (60, 'n3', 'n3', 3),
-#         (70, 'n3', 'n2', 5)
-#     ]
-#     g = create_graph(ex_data)
-#     visualize(g)
-
-#     data = read_data.read_csv("data/small_test.csv")
-#     calculated_data = read_data.get_avg_times_and_miles(data)
-
-# class nxGraph:
-#     """
-#     A networkx graph that has neighborhoods as nodes and
-#     the average distance and time for a ride as its links
-
-
-#     """
-#     _nodes:
-
-#     def __init__(self, data: list[tuple(int, str, str, float)]) -> None:
-#         """
-#         Initialize the nxGraph given the data
-
-#         Preconditions:
-#         - data follows the format from the header
-#         """
-#         unique_neighborhoods = set()
-
-#         for item in data:
-#             if item[1] not in unique_neighborhoods:
-#                 unique_neighborhoods.add(item[1])
-#             if item[2] not in unique_neighborhoods:
-#                 unique_neighborhoods.add(item[2])
-
-#         for neighborhood in unique_neighborhoods:

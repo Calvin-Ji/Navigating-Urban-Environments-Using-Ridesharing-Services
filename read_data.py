@@ -4,7 +4,16 @@ CSC111 Winter 2023 Course Project
 By: Gerald Wang, Mark Estiller, Calvin Ji, Dharma Ong
 
 This file contains functions that will read the dataset and output it in a format
-that can be used for the computations
+that can be used for the computations.
+
+Copyright and Usage Information
+===============================
+This file is Copyright (c) 2023 by Gerald Wang, Mark Estiller, Calvin Ji, Dharma Ong.
+This module is expected to use data from:
+https://www.kaggle.com/datasets/zusmani/uberdrives
+"My Uber Drives" by user Zeeshan-Ul-Hassan Usmani. The data encompassed his Uber drives primarily in North Carolina in 2016
+(1,175 drives total), and it was presented as a csv with the following columns going from left to right: start date, end date, 
+category, start, stop, number of miles, and purpose.
 """
 
 
@@ -23,6 +32,9 @@ def read_csv(file_name: str) -> list[tuple[float, str, str, float]]:
     start_loc is a string representing the starting neighborhood
     stop_loc is a string representing the stopping neighborhood
     distance is a float representing the distance travelled in miles
+
+    Precondition:
+    - file_name != ''
     """
     trip_data = []
     with open(file_name, 'r') as f:
@@ -65,22 +77,16 @@ def read_csv(file_name: str) -> list[tuple[float, str, str, float]]:
     return trip_data
 
 
-def create_graph_from_read_csv(d: dict[tuple[str, str], list[float]]) -> Network:
-    """
-    Generates and returns a network, given a tuple consisting of the neighborhood endpoints as keys,
-    with its corresponidng average time at index 0,average distance at index 1, and average cost at index 2.
-    """
-
-    network = Network()
-
-    for endpoints in d:
-        selected_endpoints = d[endpoints]
-        network.add_link(endpoints[0], endpoints[1],
-                         selected_endpoints[0], selected_endpoints[1], selected_endpoints[2])
-
-    return network
-
-
 if __name__ == '__main__':
+    import doctest
+    doctest.testmod(verbose=True)
 
-    pass
+    # When you are ready to check your work with python_ta, uncomment the following lines.
+    # (In PyCharm, select the lines below and press Ctrl/Cmd + / to toggle comments.)
+    # You can use "Run file in Python Console" to run PythonTA,
+    # and then also test your methods manually in the console.
+    # import python_ta
+    # python_ta.check_all(config={
+    #     'max-line-length': 120,
+    #     'disable': ['E9992', 'E9997']
+    # })

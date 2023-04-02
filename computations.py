@@ -3,7 +3,16 @@ CSC111 Winter 2023 Course Project
 
 By: Gerald Wang, Mark Estiller, Calvin Ji, Dharma Ong
 
-This file contains the functions that are used for the main computations in this project
+This file contains the functions that are used for the main computations in this project.
+
+Copyright and Usage Information
+===============================
+This file is Copyright (c) 2023 by Gerald Wang, Mark Estiller, Calvin Ji, Dharma Ong.
+This module is expected to use data from:
+https://www.kaggle.com/datasets/zusmani/uberdrives
+"My Uber Drives" by user Zeeshan-Ul-Hassan Usmani. The data encompassed his Uber drives primarily in North Carolina in 2016
+(1,175 drives total), and it was presented as a csv with the following columns going from left to right: start date, end date, 
+category, start, stop, number of miles, and purpose.
 """
 from __future__ import annotations
 import math
@@ -13,7 +22,7 @@ import numpy as np
 
 def estimate_neighborhood_size(neighborhood_name: str, data: dict[tuple[str], list[float]]) -> float:
     """
-    Make a very rough estimate of of the neighborhood size in miles squared and return it.
+    Make a very rough estimate of the neighborhood size in miles squared and return it.
     We can first assume that the neighborhood is a perfect circle and assume that on average that 
     the start location is in the middle of the neighborhood. We could find the average distance from 
     the city whose area we are trying to approximate to every other city that it is connected to. 
@@ -78,14 +87,19 @@ def get_avg_costs(d: dict[tuple[str], list[float]]) -> dict[tuple[str], float]:
     """
     Calculates the average cost to get from one neighbourhood to another neighborhood.
     Returns a dictionary with the endpoints as keys and the average cost as its corresponding values.
-    This formula is based on Uber's ...
+    This formula is based on Uber's base fare of $1.55 plus 20 cents per minute, and $1.20 per mile.
+    There is also an additional $1.00 "safe rides fee"
+
+    Preconditions:
+    - d is a dictionary with a tuple of endpoints as its keys, and a list containing the time at 
+    index 0, and miles at index 1 as its values
     """
     new_dict = {}
     base_fare = 1.55
     safe_rides_fee = 1.00
     assert isinstance(d, dict)
     for key in d:
-        new_dict[key] = round(base_fare + 0.20 * (d[key][0] * 1 / 60) + 1.20*(d[key][1]) + safe_rides_fee, 2)
+        new_dict[key] = round(base_fare + 0.20 * (d[key][0] * 1 / 60) + 1.20 * (d[key][1]) + safe_rides_fee, 2)
     return new_dict
 
 
@@ -93,11 +107,34 @@ def combine_dict_times_miles_cost(avg_times_and_miles: dict[tuple[str], list[flo
                                   avg_costs: dict[tuple[str], float]) -> dict[tuple[str], list[float]]:
     """
     Mutates and returns the dictionary containing the times and miles values to also include costs.
+
+    Preconditions:
+    - avg_times_and_miles is a dictionary with a tuple of endpoints as its keys, and a list containing the time at 
+    index 0, and miles at index 1 as their values
+    - avg_costs is a dictionary with a tuple of endpoints as its keys, and a float representing the cost as their value
     """
     for endpoints in avg_costs:
         avg_times_and_miles[endpoints].append(avg_costs[endpoints])
 
     return avg_times_and_miles
+
+def create_graph(d: dict[tuple[str, str], list[float]]) -> Network:
+    """
+    Generates and returns a network, given a tuple consisting of the neighborhood endpoints as keys,
+    with its corresponidng average time at index 0,average distance at index 1, and average cost at index 2.
+    """
+
+    network = Network()
+
+    for endpoints in d:
+        selected_endpoints = d[endpoints]
+        network.add_link(endpoints[0], endpoints[1],
+                         selected_endpoints[0], selected_endpoints[1], selected_endpoints[2])
+        
+    for neighborhood in network.get_all_neighborhoods():
+        neighborhood.size = estimate_neighborhood_size(neighborhood.name, d)
+
+    return network
 
 
 def find_best_path_dijsktras(network: Network, start: str, stop: str, optimize: str) -> tuple[float, list[str]]:
@@ -219,81 +256,6 @@ def compute_path_cost(path: list[Link]) -> float:
     return path_score_so_far
 
 
-# # def data_to_np(data_dict: dict[tuple[str, str], list[float]]) -> np.array:
-#     """
-#     Return a numpy array where the numbers along the diagonal are all 0,
-#     the other numbers represent the distances from an object to another object
-
-# #       0 1 2 3 4 -> columns
-#     0 0 d d d d
-#     1 d 0 d d d
-#     2 d d 0 d d
-#     3 d d d 0 d
-#     4 d d d d 0
-#     ^
-#     |
-#     rows
-#     """
-#     # first, we want to figure out the unique neighborhoods in a list
-#     index_mapping = {}
-#     index = 0
-# #     print(data_dict)
-# #     for key in data_dict:
-#         if key[0] not in index_mapping:
-#             index_mapping[key[0]] = index
-#             index += 1
-#         if key[1] not in index_mapping:
-#             index_mapping[key[1]] = index
-#             index += 1
-# #     # print(index_mapping)
-#     # assert 'Palm Beach' in index_mapping
-#     # now, we want to initialize an np array
-#     size = len(index_mapping)
-#     array = np.zeros((size, size))
-#     # print(array)
-# #     for key in data_dict:
-#         # print(key)
-#         distance = data_dict[key][1]
-#         x = index_mapping[key[0]]
-#         y = index_mapping[key[1]]
-# #         # print(f'{x}   {y}')
-# #         array[x][y] = distance
-#         array[y][x] = distance
-# #     return array
-
-
-# def find_coordinates(distances: list[list[int]]) -> np.array:
-#     """
-# #     Distances represents an n x n matrix.
-# #     Each row in the list is an object
-# #     is a python list with distances to other points as its elements
-# #
-# #     Example:
-#     >>> dist = [
-# #     >>>    [0, 1, 2],  # object A
-# #     >>>    [1, 0, 3],  # object B
-# #     >>>    [2, 3, 0]   # object C
-# #     >>> ]
-# #
-# #     Notice that the diagonals will always be 0, since the distance from a point to itself is always 0
-#     Distance from object A to object B is equal to dist[0][1],
-# #     Distance from object A to object C is equal to dist[0][2],
-# #     Distance from object B to object C is equal to dist[1][2],
-# #     etc.
-# #
-# #     Given this matrix, find the coordinates of all the objects
-
-# #     Preconditions:
-#     - all(distances[n][n] == 0 for n in range(len(distances)))
-# #     """
-# #     matrix = np.array(distances)
-# #     mds = MDS(n_components=2, dissimilarity='precomputed')
-# #     coordinates = mds.fit_transform(matrix)
-# #
-# #     return coordinates
-
-
-#
 if __name__ == '__main__':
     import doctest
     doctest.testmod(verbose=True)
