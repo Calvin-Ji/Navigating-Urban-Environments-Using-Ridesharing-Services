@@ -71,15 +71,11 @@ def display_graph(nx_graph: nx.Graph) -> None:
     >>> nx_graph = convert_to_nx(network, (0.0, ['A', 'B', 'C']))
     >>> display_graph(nx_graph)
     """
-
-    # pos = nx.spring_layout(nx_graph, k=30.0, seed=7)
     pos = nx.spring_layout(nx_graph, k=5/math.sqrt(nx_graph.order()), seed=7)
     
-    node_size = nx.get_node_attributes(nx_graph, "size")
     sizes = nx.get_node_attributes(nx_graph,'size').values()
     nx.draw_networkx_nodes(nx_graph, pos, node_size=[s for s in sizes], node_color="red")
 
-    # edge_colors = nx.get_node_attributes(nx_graph, "color")
     edges = nx_graph.edges()
     colors = [nx_graph[u][v]['color'] for u,v in edges]
     nx.draw_networkx_edges(nx_graph, pos, width=1, edge_color=colors)
