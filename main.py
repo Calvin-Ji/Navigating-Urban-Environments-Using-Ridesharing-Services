@@ -262,29 +262,30 @@ def display_graph() -> None:
 
 def runner() -> None:
     """"
-    Function that takes user inputs and runs the program based on the inputs
+    Function that takes user inputs and runs the program based on the inputs.
+    n, n1, and n2 must be valid neighborhoods in the ALL_NEIGHBORHOODS global variable
     """
-    action1 = int(input("Estimate neighborhood size/Find best path (0/1)"))
+    action1 = int(input("Estimate neighborhood size/Find best path (0/1): "))
 
     if action1 == 0:
-        n = input("Input a neighborhood")
+        n = input("Input a neighborhood (Proper Capitalization): ")
         print(run_estimate_neighborhood_size(n))
     elif action1 == 1:
-        action2 = int(input("Optimize time/distance/cost (0/1/2)"))
-        action3 = input("Use Dijkstra's algorithm? (Y/N)")
+        action2 = int(input("Optimize time/distance/cost (0/1/2): "))
+        action3 = input("Use Dijkstra's algorithm? (Y/N): ")
 
-        n1 = input("Input neighborhood 1")
-        n2 = input("Input neighborhood 2")
+        n1 = input("Input neighborhood 1 (Proper Capitalization): ")
+        n2 = input("Input neighborhood 2 (Proper Capitalization): ")
 
-        if action2 == 0 and action3 == 'Y':
+        if action2 == 0 and action3.lower() == 'y':
             print(run_find_best_path_for_time_dijsktras(n1, n2))
-        elif action2 == 1 and action3 == 'Y':
+        elif action2 == 1 and action3.lower() == 'y':
             print(run_find_best_path_for_distance_dijsktras(n1, n2))
-        elif action2 == 2 and action3 == 'Y':
+        elif action2 == 2 and action3.lower() == 'y':
             print(run_find_best_path_for_cost_dijsktras(n1, n2))
-        elif action2 == 0 and action3 == 'N':
+        elif action2 == 0 and action3.lower() == 'n':
             print(run_find_best_path_for_time(n1, n2))
-        elif action2 == 1 and action3 == 'N':
+        elif action2 == 1 and action3.lower() == 'n':
             print(run_find_best_path_for_distance(n1, n2))
         else:
             print(run_find_best_path_for_cost(n1, n2))
@@ -294,15 +295,19 @@ def runner() -> None:
 
 
 if __name__ == '__main__':
-
-    # start = True
+    start = True
     
-    # while start:
-    #     runner()
-    #     start = bool(input("Input True/False"))
+    while start:
+        runner()
+        cont = input("Continue? True/False: ")
+        if cont.lower() == 'true':
+            start = True
+        else:
+            start = False
+        # start = bool(input("Continue? True/False"))
 
     # print(run_get_all_neighbourhoods())
-    display_graph()
+    # display_graph()
 
     # print(run_find_best_path_for_time('Flatiron District', 'Midtown East'))
     # print(run_find_best_path_for_distance('Flatiron District', 'Midtown East'))
@@ -312,13 +317,13 @@ if __name__ == '__main__':
     # print(run_find_best_path_for_distance_dijsktras('Flatiron District', 'Midtown East'))
     # print(run_find_best_path_for_cost_dijsktras('Boone', 'Chapel Hill'))
 
-    print(run_estimate_neighborhood_size("Westpark Place"))
+    # print(run_estimate_neighborhood_size("Westpark Place"))
     
 
-    print(run_estimate_neighborhood_size("Durham"))
+    # print(run_estimate_neighborhood_size("Durham"))
 
 
-    print(run_estimate_neighborhood_size("Midtown"))
+    # print(run_estimate_neighborhood_size("Midtown"))
 
 
-    print(run_estimate_neighborhood_size("Cary"))
+    # print(run_estimate_neighborhood_size("Cary"))
