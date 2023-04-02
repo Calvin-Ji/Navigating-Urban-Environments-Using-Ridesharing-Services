@@ -62,7 +62,7 @@ def get_avg_times_and_miles(l: list[tuple[float, str, str, float]]) -> dict[tupl
         listy = item.split(':')
         start = listy[0]
         stop = listy[1]
-        final_dict[(start, stop)] = [avg_time]
+        final_dict[(start, stop)] = [round(avg_time, 2)]
 
     for item in links_so_far_with_miles:
         avg_miles = sum(
@@ -70,11 +70,11 @@ def get_avg_times_and_miles(l: list[tuple[float, str, str, float]]) -> dict[tupl
         listy = item.split(':')
         start = listy[0]
         stop = listy[1]
-        final_dict[(start, stop)] += [avg_miles]
+        final_dict[(start, stop)] += [round(avg_miles, 2)]
     return final_dict
 
 
-def get_avg_costs(d: dict[tuple[str, str], list[float]]) -> dict[tuple[str, str], float]:
+def get_avg_costs(d: dict[tuple[str], list[float]]) -> dict[tuple[str], float]:
     """
     Calculates the average cost to get from one neighbourhood to another neighborhood.
     Returns a dictionary with the endpoints as keys and the average cost as its corresponding values.
@@ -85,7 +85,7 @@ def get_avg_costs(d: dict[tuple[str, str], list[float]]) -> dict[tuple[str, str]
     safe_rides_fee = 1.00
     assert isinstance(d, dict)
     for key in d:
-        new_dict[key] = base_fare + 0.20 * (d[key][0] * 1 / 60) + 1.20*(d[key][1]) + safe_rides_fee
+        new_dict[key] = round(base_fare + 0.20 * (d[key][0] * 1 / 60) + 1.20*(d[key][1]) + safe_rides_fee, 2)
     return new_dict
 
 
@@ -100,22 +100,22 @@ def combine_dict_times_miles_cost(avg_times_and_miles: dict[tuple[str], list[flo
     return avg_times_and_miles
 
 
-def find_shortest_path_dijsktras(network: Network, start: str, stop: str, optimize: str) -> tuple[float, list[str]]:
+def find_best_path_dijsktras(network: Network, start: str, stop: str, optimize: str) -> tuple[float, list[str]]:
     """ 
-    Return the shortest path and its distance between the start 
+    Return the best path and its optimized variable between the start 
     neighborhood and the stop neighborhood using Dijsktra's algorithm
 
     >>> network = Network()
     >>> network.add_link('A', 'B', 0, 0, 1.0)
     >>> network.add_link('B', 'C', 0, 0, 2.0)
     >>> network.add_link('C', 'D', 0, 0, 3.0)
-    >>> find_shortest_path_dijsktras(network, 'A', 'D', 'cost')
+    >>> find_best_path_dijsktras(network, 'A', 'D', 'cost')
     (6.0, ['A', 'B', 'C', 'D'])
     >>> network.add_link('A', 'D', 0, 0, 4.0)
-    >>> find_shortest_path_dijsktras(network, 'A', 'D', 'cost')
+    >>> find_best_path_dijsktras(network, 'A', 'D', 'cost')
     (4.0, ['A', 'D'])
     >>> network.add_link('A', 'C', 0, 0, 0.0)
-    >>> find_shortest_path_dijsktras(network, 'A', 'D', 'cost')
+    >>> find_best_path_dijsktras(network, 'A', 'D', 'cost')
     (3.0, ['A', 'C', 'D'])
     """
 

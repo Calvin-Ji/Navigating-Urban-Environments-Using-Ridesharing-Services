@@ -1,0 +1,11 @@
+# CSC111 Winter 2023: Libraries for the Course Project
+
+hypothesis~=6.54.5
+pytest~=7.1.3
+python-ta~=2.4.0
+
+plotly>=5.8,<5.9
+networkx~=3.0
+numpy~=1.24.2
+
+matplotlib~=3.7.1
