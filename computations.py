@@ -33,7 +33,7 @@ def estimate_neighborhood_size(neighborhood_name: str, data: dict[tuple[str], li
     return upper_bound
 
 
-def get_avg_times_and_miles(l: list[tuple[float, str, str, float]]) -> dict[tuple[str, str], list[float]]:
+def get_avg_times_and_miles(l: list[tuple[float, str, str, float]]) -> dict[tuple[str], list[float]]:
     """
     Return a dictionary where a set of 2 endpoints are keys and the list containing the
     average time at index 0, average distance at index 1, and average cost at index 2
@@ -74,7 +74,7 @@ def get_avg_times_and_miles(l: list[tuple[float, str, str, float]]) -> dict[tupl
     return final_dict
 
 
-def get_avg_costs(d: dict[tuple[str, str], list[float]]) -> dict[tuple[str, str], float]:
+def get_avg_costs(d: dict[tuple[str], list[float]]) -> dict[tuple[str], float]:
     """
     Calculates the average cost to get from one neighbourhood to another neighborhood.
     Returns a dictionary with the endpoints as keys and the average cost as its corresponding values.
@@ -83,14 +83,14 @@ def get_avg_costs(d: dict[tuple[str, str], list[float]]) -> dict[tuple[str, str]
     new_dict = {}
     base_fare = 1.55
     safe_rides_fee = 1.00
-    for endpoints in d:
-        new_dict[endpoints] = base_fare + 0.20 * \
-            (d[endpoints][0]/60) + 1.20*(d[endpoints][1]) + safe_rides_fee
+    for key in d:
+        new_dict[key] = base_fare + 0.20 * \
+            (d[key][0] * 1 / 60) + 1.20*(d[key][1]) + safe_rides_fee
     return new_dict
 
 
-def combine_dict_times_miles_cost(avg_times_and_miles: dict[tuple[str, str], list[float]],
-                                  avg_costs: dict[tuple[str, str], float]) -> dict[tuple[str, str], list[float]]:
+def combine_dict_times_miles_cost(avg_times_and_miles: dict[tuple[str], list[float]],
+                                  avg_costs: dict[tuple[str], float]) -> dict[tuple[str], list[float]]:
     """
     Mutates and returns the dictionary containing the times and miles values to also include costs.
     """
