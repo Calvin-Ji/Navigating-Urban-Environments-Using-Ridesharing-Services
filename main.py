@@ -190,7 +190,7 @@ def run_initialize_sizes() -> float:
     return NC_size
 
 def display_graph() -> None:
-    data = read_data.read_csv("data/small_test.csv")
+    data = read_data.read_csv("data/My Uber Drives - 2016.csv")
 
     # Accumulates the average times, miles, and costs into final_dict
     times_and_miles = computations.get_avg_times_and_miles(data)

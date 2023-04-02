@@ -5,6 +5,8 @@ from __future__ import annotations
 from classes import Network
 import matplotlib.pyplot as plt
 import networkx as nx
+import math
+import graphviz
 
 
 def convert_to_nx(graph: Network) -> nx.Graph:
@@ -40,15 +42,16 @@ def display_graph(nx_graph: nx.Graph) -> None:
     >>> display_graph(nx_graph)
     """
 
-    pos = nx.spring_layout(nx_graph, k=3.0, seed=7)
+    # pos = nx.spring_layout(nx_graph, k=30.0, seed=7)
+    pos = nx.spring_layout(nx_graph, k=5/math.sqrt(nx_graph.order()), seed=7)
     
-    nx.draw_networkx_nodes(nx_graph, pos, node_size=400)
-    nx.draw_networkx_edges(nx_graph, pos, width=3)
+    nx.draw_networkx_nodes(nx_graph, pos, node_size=200, node_color="red")
+    nx.draw_networkx_edges(nx_graph, pos, width=1)
     nx.draw_networkx_labels(nx_graph, pos, font_size=5,
                             font_family="sans-serif")
 
     edge_labels = nx.get_edge_attributes(nx_graph, "weight")
-    nx.draw_networkx_edge_labels(nx_graph, pos, edge_labels, font_size=5)
+    nx.draw_networkx_edge_labels(nx_graph, pos, edge_labels, font_size=5, font_color="blue")
 
     ax = plt.gca()
     ax.margins(0.08)
