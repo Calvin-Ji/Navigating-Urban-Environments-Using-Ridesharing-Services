@@ -8,6 +8,7 @@ This python file helps visualize the network we have created.
 Copyright and Usage Information
 ===============================
 This file is Copyright (c) 2023 by Gerald Wang, Mark Estiller, Calvin Ji, Dharma Ong.
+
 This module is expected to use data from:
 https://www.kaggle.com/datasets/zusmani/uberdrives
 "My Uber Drives" by user Zeeshan-Ul-Hassan Usmani. The data encompassed his Uber drives primarily in North Carolina in 2016
@@ -20,7 +21,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import math
 from typing import Optional
-# import graphviz
+
 
 
 def convert_to_nx(graph: Network, path_tuple: Optional[tuple(float, list[str])] = None) -> nx.Graph:
@@ -97,8 +98,7 @@ if __name__ == '__main__':
     # (In PyCharm, select the lines below and press Ctrl/Cmd + / to toggle comments.)
     # You can use "Run file in Python Console" to run PythonTA,
     # and then also test your methods manually in the console.
-    # import python_ta
-    # python_ta.check_all(config={
-    #     'max-line-length': 120,
-    #     'disable': ['E9992', 'E9997']
-    # })
+    import python_ta
+    python_ta.check_all(config={
+        'max-line-length': 120,
+    })

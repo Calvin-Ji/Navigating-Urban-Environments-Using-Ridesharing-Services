@@ -4,8 +4,8 @@ CSC111 Winter 2023 Course Project
 By: Gerald Wang, Mark Estiller, Calvin Ji, Dharma Ong
 
 This file contains a collection of Python classes and functions that will be used to represent a
-network using neighborhoods found in the dataset. One of the calls to the core computations for this 
-project, which is about finding the best path to optimize certain variables (time, distance, cost), is 
+network using neighborhoods found in the dataset. One of the calls to the core computations for this
+project, which is about finding the best path to optimize certain variables (time, distance, cost), is
 contained in this file. 
 
 Copyright and Usage Information
@@ -14,13 +14,14 @@ This file is Copyright (c) 2023 by Gerald Wang, Mark Estiller, Calvin Ji, Dharma
 This module is expected to use data from:
 https://www.kaggle.com/datasets/zusmani/uberdrives
 "My Uber Drives" by user Zeeshan-Ul-Hassan Usmani. The data encompassed his Uber drives primarily in North Carolina in 2016
-(1,175 drives total), and it was presented as a csv with the following columns going from left to right: start date, end date, 
+(1,175 drives total), and it was presented as a csv with the following columns going from left to right: start date, end date,
 category, start, stop, number of miles, and purpose.
 """
 
 from __future__ import annotations
 from typing import Callable
 import math
+# from computations import compute_path_cost, compute_path_distance, compute_path_time
 
 
 class Neighborhood:
@@ -28,15 +29,11 @@ class Neighborhood:
     A neighborhood in the network
 
     Instance Attributes:
-    - name: 
-        the name of this neighborhood
-    - links:
-        A mapping that contains the lin ks of this node
-        Each key represents the name of the other neighborhoods connected by this node
-        The corresponding value is the link leading to that neighborhood
-    - size:
-        The size of this neighborhood. This will be estimated by another function from the 
-        computations file. 
+    - name: the name of this neighborhood
+    - links: A mapping that contains the links of this node. Each key represents the name of the other
+    neighborhoods connected by this node. The corresponding value is the link leading to that neighborhood
+    - size: The size of this neighborhood. This will be estimated by another function from the
+    computations file.
 
     Representation Invariants:
     - self.name not in self.links
@@ -84,7 +81,6 @@ class Neighborhood:
                     path_so_far = [link]
         return all_paths
     
-
     def check_connected(self, target_name: str, visited: set[Neighborhood]) -> bool:
         """
         Check whether this neighborhood is connected to the target_name neighborhood
@@ -128,10 +124,10 @@ class Link:
     distance: float
     cost: float
 
-    def __init__(self, neighborhood1: Neighborhood, neighborhood2: Neighborhood, 
+    def __init__(self, neighborhood1: Neighborhood, neighborhood2: Neighborhood,
                  time: float, distance: float, cost: float) -> None:
         """
-        Iniitalize a link between 2 neighborhoods. This link contains information about the 
+        Iniitalize a link between 2 neighborhoods. This link contains information about the
         time, distance, and cost to go from the first neighborhood to the second.
 
         Preconditions:
@@ -157,10 +153,10 @@ class Link:
 
     def get_other_endpoint(self, neighborhood: Neighborhood) -> Neighborhood:
         """
-        Return the endpoint of this link that is not equal to the given neighborhood. 
-
+        Return the endpoint of this link that is not equal to the given neighborhood.
+        
         Preconditions: 
-            - neighborhood in self.endpoints 
+        - neighborhood in self.endpoints 
         """
         return (self.endpoints - {neighborhood}).pop()
 
@@ -174,7 +170,7 @@ class Link:
 class Network:  # graph
     """A network of Neighborhood(s) connected by Links."""
     # Private Instance Attributes:
-    #    - _nrighborhoods: a mapping from names of the neighborhoods to the Neighborhood in this network
+    #    - _neighborhoods: a mapping from names of the neighborhoods to the Neighborhood in this network
 
     _neighborhoods: dict[str, Neighborhood]
 
@@ -198,7 +194,6 @@ class Network:  # graph
             size_dict[neighborhood.name] = neighborhood.size
         
         return size_dict
-
 
     def add_neighborhood(self, name: str) -> Neighborhood:
         """
@@ -344,6 +339,7 @@ class Network:  # graph
 
         return set_of_neighborhoods
 
+
 if __name__ == '__main__':
     import doctest
     doctest.testmod(verbose=True)
@@ -352,12 +348,12 @@ if __name__ == '__main__':
     # (In PyCharm, select the lines below and press Ctrl/Cmd + / to toggle comments.)
     # You can use "Run file in Python Console" to run PythonTA,
     # and then also test your methods manually in the console.
-    # import python_ta
-    # python_ta.check_all(config={
-    #     'max-line-length': 120,
-    #     'disable': ['E9992', 'E9997'],
-    #     'extra_imports': [math]
-    # })
+    import python_ta
+    python_ta.check_all(config={
+        'max-line-length': 120,
+        'disable': ['E9992', 'E9997'],
+        'extra_imports': [math]
+    })
 
     # network = Network()
     # network.add_link('A', 'B', 0, 9, 0)

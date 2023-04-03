@@ -8,6 +8,7 @@ This file contains the functions that are used for the main computations in this
 Copyright and Usage Information
 ===============================
 This file is Copyright (c) 2023 by Gerald Wang, Mark Estiller, Calvin Ji, Dharma Ong.
+
 This module is expected to use data from:
 https://www.kaggle.com/datasets/zusmani/uberdrives
 "My Uber Drives" by user Zeeshan-Ul-Hassan Usmani. The data encompassed his Uber drives primarily in North Carolina in 2016

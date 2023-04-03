@@ -13,6 +13,7 @@ to the global variable ALL_NEIGHBORHOODS to see valid neighborhoods.
 Copyright and Usage Information
 ===============================
 This file is Copyright (c) 2023 by Gerald Wang, Mark Estiller, Calvin Ji, Dharma Ong.
+
 This module is expected to use data from:
 https://www.kaggle.com/datasets/zusmani/uberdrives
 "My Uber Drives" by user Zeeshan-Ul-Hassan Usmani. The data encompassed his Uber drives primarily in North Carolina in 2016
@@ -23,9 +24,11 @@ category, start, stop, number of miles, and purpose.
 
 from __future__ import annotations
 import read_data
-from classes import Neighborhood, Link, Network
+from classes import Link
 import computations
 import visualizations
+from typing import Optional
+
 
 ALL_NEIGHBORHOODS = {'Central', 'Briar Meadow', 'Covington', 'Chessington', 'Huntington Woods', 'Hayesville', 
                      'Parkway Museums', 'Nugegoda', 'Kissimmee', 'French Quarter', 'Topton', 'Tribeca', 
@@ -272,39 +275,47 @@ def runner() -> None:
         print(run_estimate_neighborhood_size(n))
     elif action1 == 1:
         action2 = int(input("Optimize time/distance/cost (0/1/2): "))
-        action3 = input("Use Dijkstra's algorithm? (Y/N): ")
+        action3 = input("Use Dijkstra's algorithm? (y/n): ")
 
         n1 = input("Input neighborhood 1 (Proper Capitalization): ")
         n2 = input("Input neighborhood 2 (Proper Capitalization): ")
 
         if action2 == 0 and action3.lower() == 'y':
             print(run_find_best_path_for_time_dijsktras(n1, n2))
+            display_graph(run_find_best_path_for_time_dijsktras(n1, n2))
         elif action2 == 1 and action3.lower() == 'y':
             print(run_find_best_path_for_distance_dijsktras(n1, n2))
+            display_graph(run_find_best_path_for_distance_dijsktras(n1, n2))
         elif action2 == 2 and action3.lower() == 'y':
             print(run_find_best_path_for_cost_dijsktras(n1, n2))
+            display_graph(run_find_best_path_for_cost_dijsktras(n1, n2))
         elif action2 == 0 and action3.lower() == 'n':
             print(run_find_best_path_for_time(n1, n2))
+            display_graph(run_find_best_path_for_time(n1, n2))
         elif action2 == 1 and action3.lower() == 'n':
             print(run_find_best_path_for_distance(n1, n2))
+            display_graph(run_find_best_path_for_distance(n1, n2))
         else:
             print(run_find_best_path_for_cost(n1, n2))
+            display_graph(run_find_best_path_for_cost(n1, n2))
         
         
         
 
 
 if __name__ == '__main__':
-    # start = True
+    start = True
     
-    # while start:
-    #     runner()
-    #     cont = input("Continue? True/False: ")
-    #     if cont.lower() == 'true':
-    #         start = True
-    #     else:
-    #         start = False
-        # start = bool(input("Continue? True/False"))
+    while start:
+        runner()
+        start = bool(input("Continue? True/False: "))
+        if str(start).lower() == 'true':
+            start = True
+        else:
+            start = False
+
+
+        
 
     # print(run_get_all_neighbourhoods())
     display_graph(run_find_best_path_for_cost_dijsktras('Boone', 'Chapel Hill'))
