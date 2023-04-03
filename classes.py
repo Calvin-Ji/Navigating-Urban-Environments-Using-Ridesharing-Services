@@ -6,22 +6,20 @@ By: Gerald Wang, Mark Estiller, Calvin Ji, Dharma Ong
 This file contains a collection of Python classes and functions that will be used to represent a
 network using neighborhoods found in the dataset. One of the calls to the core computations for this
 project, which is about finding the best path to optimize certain variables (time, distance, cost), is
-contained in this file. 
+contained in this file.
 
 Copyright and Usage Information
 ===============================
 This file is Copyright (c) 2023 by Gerald Wang, Mark Estiller, Calvin Ji, Dharma Ong.
 This module is expected to use data from:
 https://www.kaggle.com/datasets/zusmani/uberdrives
-"My Uber Drives" by user Zeeshan-Ul-Hassan Usmani. The data encompassed his Uber drives primarily in North Carolina in 2016
-(1,175 drives total), and it was presented as a csv with the following columns going from left to right: start date, end date,
-category, start, stop, number of miles, and purpose.
+"My Uber Drives" by user Zeeshan-Ul-Hassan Usmani. The data encompassed his Uber drives primarily in North Carolina
+in 2016 (1,175 drives total), and it was presented as a csv with the following columns going from left to right:
+start date, end date, category, start, stop, number of miles, and purpose.
 """
 
 from __future__ import annotations
 from typing import Callable
-import math
-# from computations import compute_path_cost, compute_path_distance, compute_path_time
 
 
 class Neighborhood:
@@ -80,7 +78,7 @@ class Neighborhood:
                     all_paths.append(path_so_far)
                     path_so_far = [link]
         return all_paths
-    
+
     def check_connected(self, target_name: str, visited: set[Neighborhood]) -> bool:
         """
         Check whether this neighborhood is connected to the target_name neighborhood
@@ -154,9 +152,9 @@ class Link:
     def get_other_endpoint(self, neighborhood: Neighborhood) -> Neighborhood:
         """
         Return the endpoint of this link that is not equal to the given neighborhood.
-        
-        Preconditions: 
-        - neighborhood in self.endpoints 
+
+        Preconditions:
+        - neighborhood in self.endpoints
         """
         return (self.endpoints - {neighborhood}).pop()
 
@@ -181,18 +179,22 @@ class Network:  # graph
         self._neighborhoods = {}
 
     def initialize_test_sizes(self) -> None:
+        """
+        Assigns a size for each neighborhood
+        """
         for n in self._neighborhoods.values():
             links_list = list(n.links.values())
             n.size = links_list[0].distance
 
     def get_all_sizes(self) -> dict[str, float]:
         """
+        Returns a dictionary with neighborhood names as a key and its sizes as its values
         """
         size_dict = {}
 
         for neighborhood in self._neighborhoods.values():
             size_dict[neighborhood.name] = neighborhood.size
-        
+
         return size_dict
 
     def add_neighborhood(self, name: str) -> Neighborhood:
@@ -244,8 +246,8 @@ class Network:  # graph
 
     def find_best_path_for_key(self, start: str, end: str, key: Callable) -> list[Link]:
         """
-        Finds the best path for a certain variable, either time, distance, or cost, given a starting point and 
-        end point. The path score is defined as either the total distance, the total time taken, or the total cost 
+        Finds the best path for a certain variable, either time, distance, or cost, given a starting point and
+        end point. The path score is defined as either the total distance, the total time taken, or the total cost
         (adding up every weighted link in the path depending on the key) from the starting point to the end point,
         and we are trying to minimize the path score
 
@@ -254,19 +256,25 @@ class Network:  # graph
         - end in self._neighborhoods
         - key in {compute_path_time, compute_path_distance, compute_path_cost}
 
+        The following doctest examples will raise a NameError since the keys called are defined in the computations
+        file instead of this file. These doctest examples are only to illustrate what the functions do.
+
         >>> network = Network()
         >>> network.add_link('A', 'B', 5.0, 10.0, 10.0)
-        >>> network.add_link('B', 'C', 10.0, 5.0, 10.0)   
+        >>> network.add_link('B', 'C', 10.0, 5.0, 10.0)
         >>> network.add_link('C', 'D', 10.0, 10.0, 10.0)
-        >>> network.add_link('D', 'E', 10.0, 10.0, 8.0)   
+        >>> network.add_link('D', 'E', 10.0, 10.0, 8.0)
         >>> network.add_link('E', 'F', 10.0, 10.0, 10.0)
-        >>> network.add_link('F', 'A', 10.0, 10.0, 10.0)   
+        >>> network.add_link('F', 'A', 10.0, 10.0, 10.0)
         >>> network.find_best_path_for_key('A', 'D', compute_path_time)
-        [Links(Neighborhood(A), Neighborhood(B)), Links(Neighborhood(B), Neighborhood(C)), Links(Neighborhood(C), Neighborhood(D))]
+        [Links(Neighborhood(B), Neighborhood(A)), Links(Neighborhood(B), Neighborhood(C)),
+        Links(Neighborhood(D), Neighborhood(C))]
         >>> network.find_best_path_for_key('A', 'D', compute_path_distance)
-        [Links(Neighborhood(A), Neighborhood(B)), Links(Neighborhood(B), Neighborhood(C)), Links(Neighborhood(C), Neighborhood(D))]  
+        [Links(Neighborhood(B), Neighborhood(A)), Links(Neighborhood(B), Neighborhood(C)),
+        Links(Neighborhood(D), Neighborhood(C))]
         >>> network.find_best_path_for_key('A', 'D', compute_path_cost)
-        [Links(Neighborhood(F), Neighborhood(A)), Links(Neighborhood(F), Neighborhood(E)), Links(Neighborhood(D), Neighborhood(E))]
+        [Links(Neighborhood(A), Neighborhood(F)), Links(Neighborhood(F), Neighborhood(E)),
+        Links(Neighborhood(D), Neighborhood(E))]
         """
         # Accumulates every possible path
         all_possible_paths = self.find_all_possible_paths(start, end)
@@ -287,10 +295,10 @@ class Network:  # graph
 
     # Helper method for above method
     def find_all_possible_paths(self, start: str, end: str) -> list[list[Link]]:
-        """Return a list of all paths in this graph between start and end. 
+        """Return a list of all paths in this graph between start and end.
 
-        Preconditions: 
-        - start in self._neighborhoods 
+        Preconditions:
+        - start in self._neighborhoods
         - end in self._neighborhoods
         """
         start_neighborhood = self._neighborhoods[start]
@@ -309,7 +317,7 @@ class Network:  # graph
         return False
 
     def get_neighborhood(self, name: str) -> Neighborhood:
-        """ 
+        """
         Returns the neighborhood object corresponding to the name of the neighborhood
 
         Preconditions:
@@ -328,9 +336,10 @@ class Network:  # graph
                 set_of_links.add(link)
 
         return set_of_links
-    
+
     def get_all_neighborhoods(self) -> set[Neighborhood]:
         """
+        Returns a set of all the neighborhoods in the network
         """
         set_of_neighborhoods = set()
 
@@ -351,24 +360,5 @@ if __name__ == '__main__':
     import python_ta
     python_ta.check_all(config={
         'max-line-length': 120,
-        'disable': ['E9992', 'E9997'],
-        'extra_imports': [math]
+        'disable': ['E9999', 'R0913']
     })
-
-    # network = Network()
-    # network.add_link('A', 'B', 0, 9, 0)
-    # network.add_link('A', 'C', 0, 10, 0)
-    # network.add_link('A', 'D', 0, 11, 0)
-    # network.add_link('A', 'E', 0, 12, 0)
-    # print(network.get_neighborhood('A').size)
-
-    # ex_data = [
-    #     (50, 'n1', 'n2', 1),
-    #     (60, 'n3', 'n3', 3),
-    #     (70, 'n3', 'n2', 5)
-    # ]
-    # g = create_graph(ex_data)
-    # visualize(g)
-
-    # data = read_data.read_csv("data/small_test.csv")
-    # calculated_data = read_data.get_avg_times_and_miles(data)

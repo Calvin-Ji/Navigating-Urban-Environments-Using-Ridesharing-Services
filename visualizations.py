@@ -8,20 +8,18 @@ This python file helps visualize the network we have created.
 Copyright and Usage Information
 ===============================
 This file is Copyright (c) 2023 by Gerald Wang, Mark Estiller, Calvin Ji, Dharma Ong.
-
 This module is expected to use data from:
 https://www.kaggle.com/datasets/zusmani/uberdrives
-"My Uber Drives" by user Zeeshan-Ul-Hassan Usmani. The data encompassed his Uber drives primarily in North Carolina in 2016
-(1,175 drives total), and it was presented as a csv with the following columns going from left to right: start date, end date, 
-category, start, stop, number of miles, and purpose.
+"My Uber Drives" by user Zeeshan-Ul-Hassan Usmani. The data encompassed his Uber drives primarily in North Carolina
+in 2016 (1,175 drives total), and it was presented as a csv with the following columns going from left to right:
+start date, end date, category, start, stop, number of miles, and purpose.
 """
 from __future__ import annotations
+from typing import Optional
 from classes import Network
 import matplotlib.pyplot as plt
 import networkx as nx
 import math
-from typing import Optional
-
 
 
 def convert_to_nx(graph: Network, path_tuple: Optional[tuple(float, list[str])] = None) -> nx.Graph:
@@ -34,7 +32,7 @@ def convert_to_nx(graph: Network, path_tuple: Optional[tuple(float, list[str])] 
     """
     new = nx.Graph()
     links = graph.get_all_links()
-    
+
     if path_tuple is not None:
         path = path_tuple[1]
         path_endpoints_list = [{path[i], path[i + 1]} for i in range(0, len(path) - 1)]
@@ -42,7 +40,7 @@ def convert_to_nx(graph: Network, path_tuple: Optional[tuple(float, list[str])] 
     for link in links:
         endpoints = list(link.get_endpoints())
         cost = link.cost
-        
+
         for n in endpoints:
             if not new.has_node(n.name):
                 new.add_node(n.name, size=int(math.log(n.size + 1) * 50))
@@ -69,13 +67,13 @@ def display_graph(nx_graph: nx.Graph) -> None:
     >>> nx_graph = convert_to_nx(network, (0.0, ['A', 'B', 'C']))
     >>> display_graph(nx_graph)
     """
-    pos = nx.spring_layout(nx_graph, k=5/math.sqrt(nx_graph.order()), seed=7)
-    
-    sizes = [s for s in nx.get_node_attributes(nx_graph,'size').values()]
+    pos = nx.spring_layout(nx_graph, k=5 / math.sqrt(nx_graph.order()), seed=7)
+
+    sizes = [s for s in nx.get_node_attributes(nx_graph, 'size').values()]
     nx.draw_networkx_nodes(nx_graph, pos, node_size=sizes, node_color="red")
 
     edges = nx_graph.edges()
-    colors = [nx_graph[u][v]['color'] for u,v in edges]
+    colors = [nx_graph[u][v]['color'] for u, v in edges]
     nx.draw_networkx_edges(nx_graph, pos, width=1, edge_color=colors)
     nx.draw_networkx_labels(nx_graph, pos, font_size=5,
                             font_family="sans-serif")
@@ -101,4 +99,5 @@ if __name__ == '__main__':
     import python_ta
     python_ta.check_all(config={
         'max-line-length': 120,
+        'disable': ['E9999', 'E9969', 'R1721', 'C0411']
     })

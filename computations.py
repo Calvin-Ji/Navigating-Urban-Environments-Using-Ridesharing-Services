@@ -8,26 +8,25 @@ This file contains the functions that are used for the main computations in this
 Copyright and Usage Information
 ===============================
 This file is Copyright (c) 2023 by Gerald Wang, Mark Estiller, Calvin Ji, Dharma Ong.
-
 This module is expected to use data from:
 https://www.kaggle.com/datasets/zusmani/uberdrives
-"My Uber Drives" by user Zeeshan-Ul-Hassan Usmani. The data encompassed his Uber drives primarily in North Carolina in 2016
-(1,175 drives total), and it was presented as a csv with the following columns going from left to right: start date, end date, 
-category, start, stop, number of miles, and purpose.
+"My Uber Drives" by user Zeeshan-Ul-Hassan Usmani. The data encompassed his Uber drives primarily in North Carolina
+in 2016 (1,175 drives total), and it was presented as a csv with the following columns going from left to right:
+start date, end date, category, start, stop, number of miles, and purpose.
+
 """
 from __future__ import annotations
 import math
-from classes import Neighborhood, Link, Network
-import numpy as np
+from classes import Link, Network
 
 
 def estimate_neighborhood_size(neighborhood_name: str, data: dict[tuple[str], list[float]]) -> float:
     """
     Make a very rough estimate of the neighborhood size in miles squared and return it.
-    We can first assume that the neighborhood is a perfect circle and assume that on average that 
-    the start location is in the middle of the neighborhood. We could find the average distance from 
-    the city whose area we are trying to approximate to every other city that it is connected to. 
-    We take the smallest average distance because presumably that would be the closest city that is 
+    We can first assume that the neighborhood is a perfect circle and assume that on average that
+    the start location is in the middle of the neighborhood. We could find the average distance from
+    the city whose area we are trying to approximate to every other city that it is connected to.
+    We take the smallest average distance because presumably that would be the closest city that is
     nearby, and that could be a guess for our radius.
 
     Preconditions:
@@ -92,7 +91,7 @@ def get_avg_costs(d: dict[tuple[str], list[float]]) -> dict[tuple[str], float]:
     There is also an additional $1.00 "safe rides fee"
 
     Preconditions:
-    - d is a dictionary with a tuple of endpoints as its keys, and a list containing the time at 
+    - d is a dictionary with a tuple of endpoints as its keys, and a list containing the time at
     index 0, and miles at index 1 as its values
     """
     new_dict = {}
@@ -110,7 +109,7 @@ def combine_dict_times_miles_cost(avg_times_and_miles: dict[tuple[str], list[flo
     Mutates and returns the dictionary containing the times and miles values to also include costs.
 
     Preconditions:
-    - avg_times_and_miles is a dictionary with a tuple of endpoints as its keys, and a list containing the time at 
+    - avg_times_and_miles is a dictionary with a tuple of endpoints as its keys, and a list containing the time at
     index 0, and miles at index 1 as their values
     - avg_costs is a dictionary with a tuple of endpoints as its keys, and a float representing the cost as their value
     """
@@ -118,6 +117,7 @@ def combine_dict_times_miles_cost(avg_times_and_miles: dict[tuple[str], list[flo
         avg_times_and_miles[endpoints].append(avg_costs[endpoints])
 
     return avg_times_and_miles
+
 
 def create_graph(d: dict[tuple[str, str], list[float]]) -> Network:
     """
@@ -131,7 +131,7 @@ def create_graph(d: dict[tuple[str, str], list[float]]) -> Network:
         selected_endpoints = d[endpoints]
         network.add_link(endpoints[0], endpoints[1],
                          selected_endpoints[0], selected_endpoints[1], selected_endpoints[2])
-        
+
     for neighborhood in network.get_all_neighborhoods():
         neighborhood.size = estimate_neighborhood_size(neighborhood.name, d)
 
@@ -139,8 +139,8 @@ def create_graph(d: dict[tuple[str, str], list[float]]) -> Network:
 
 
 def find_best_path_dijsktras(network: Network, start: str, stop: str, optimize: str) -> tuple[float, list[str]]:
-    """ 
-    Return the best path and its optimized variable between the start 
+    """
+    Return the best path and its optimized variable between the start
     neighborhood and the stop neighborhood using Dijsktra's algorithm
 
     >>> network = Network()
@@ -174,7 +174,7 @@ def find_best_path_dijsktras(network: Network, start: str, stop: str, optimize: 
 
     current_node = network.get_neighborhood(start)
 
-    while current_node != None:
+    while current_node is not None:
         # temporary variables used to determine which node to look at next
         next_node = None
         # path_cost = math.inf
@@ -224,6 +224,7 @@ def find_best_path_dijsktras(network: Network, start: str, stop: str, optimize: 
 
     return (distance, path)
 
+
 def compute_path_time(path: list[Link]) -> float:
     """
     Returns the path score by adding every time taken in the path's weighted links.
@@ -265,8 +266,8 @@ if __name__ == '__main__':
     # (In PyCharm, select the lines below and press Ctrl/Cmd + / to toggle comments.)
     # You can use "Run file in Python Console" to run PythonTA,
     # and then also test your methods manually in the console.
-    # import python_ta
-    # python_ta.check_all(config={
-    #     'max-line-length': 120,
-    #     'disable': ['E9992', 'E9997']
-    # })
+    import python_ta
+    python_ta.check_all(config={
+        'max-line-length': 120,
+        'disable': ['E9992', 'E9997', 'E9999', 'R0914', 'E9969', 'E9989']
+    })

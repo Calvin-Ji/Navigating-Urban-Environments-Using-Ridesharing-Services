@@ -11,18 +11,13 @@ Copyright and Usage Information
 This file is Copyright (c) 2023 by Gerald Wang, Mark Estiller, Calvin Ji, Dharma Ong.
 This module is expected to use data from:
 https://www.kaggle.com/datasets/zusmani/uberdrives
-"My Uber Drives" by user Zeeshan-Ul-Hassan Usmani. The data encompassed his Uber drives primarily in North Carolina in 2016
-(1,175 drives total), and it was presented as a csv with the following columns going from left to right: start date, end date, 
-category, start, stop, number of miles, and purpose.
+"My Uber Drives" by user Zeeshan-Ul-Hassan Usmani. The data encompassed his Uber drives primarily in North Carolina
+in 2016 (1,175 drives total), and it was presented as a csv with the following columns going from left to right:
+start date, end date, category, start, stop, number of miles, and purpose.
 """
-
 
 from __future__ import annotations
 import datetime
-# import math  # This is for the estimate size function - Calvin
-import computations
-import numpy as np
-from classes import Network # Neighborhood, Link, Network
 
 
 def read_csv(file_name: str) -> list[tuple[float, str, str, float]]:
@@ -48,9 +43,6 @@ def read_csv(file_name: str) -> list[tuple[float, str, str, float]]:
         start_loc = row[3]
         stop_loc = row[4]
         distance = row[5]
-
-        # print(row)
-        # print(row[0])
 
         if start_loc != stop_loc and start_loc != 'Unknown Location' and stop_loc != 'Unknown Location':
             # converting the times to datetimes
@@ -85,8 +77,8 @@ if __name__ == '__main__':
     # (In PyCharm, select the lines below and press Ctrl/Cmd + / to toggle comments.)
     # You can use "Run file in Python Console" to run PythonTA,
     # and then also test your methods manually in the console.
-    # import python_ta
-    # python_ta.check_all(config={
-    #     'max-line-length': 120,
-    #     'disable': ['E9992', 'E9997']
-    # })
+    import python_ta
+    python_ta.check_all(config={
+        'max-line-length': 120,
+        'disable': ['E9992', 'E9997', 'E9999', 'E9998', 'R0914']
+    })
