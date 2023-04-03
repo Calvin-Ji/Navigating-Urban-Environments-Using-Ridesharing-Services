@@ -244,7 +244,7 @@ def run_estimate_neighborhood_size(neighborhood: str) -> float:
     return network.get_neighborhood(neighborhood).size
 
 
-def display_graph() -> None:
+def display_graph(path: Optional[tuple[float, list[str]]] = None) -> None:
     """Displays the whole network"""
     data = read_data.read_csv("data/My Uber Drives - 2016.csv")
 
@@ -255,7 +255,7 @@ def display_graph() -> None:
 
     # Create a network
     network = computations.create_graph(final_dict)
-    nx_graph = visualizations.convert_to_nx(network)
+    nx_graph = visualizations.convert_to_nx(network, path)
     visualizations.display_graph(nx_graph)
 
 
@@ -295,19 +295,19 @@ def runner() -> None:
 
 
 if __name__ == '__main__':
-    start = True
+    # start = True
     
-    while start:
-        runner()
-        cont = input("Continue? True/False: ")
-        if cont.lower() == 'true':
-            start = True
-        else:
-            start = False
+    # while start:
+    #     runner()
+    #     cont = input("Continue? True/False: ")
+    #     if cont.lower() == 'true':
+    #         start = True
+    #     else:
+    #         start = False
         # start = bool(input("Continue? True/False"))
 
     # print(run_get_all_neighbourhoods())
-    # display_graph()
+    display_graph(run_find_best_path_for_cost_dijsktras('Boone', 'Chapel Hill'))
 
     # print(run_find_best_path_for_time('Flatiron District', 'Midtown East'))
     # print(run_find_best_path_for_distance('Flatiron District', 'Midtown East'))
@@ -315,7 +315,7 @@ if __name__ == '__main__':
 
     # print(run_find_best_path_for_time_dijsktras('Flatiron District', 'Midtown East'))
     # print(run_find_best_path_for_distance_dijsktras('Flatiron District', 'Midtown East'))
-    # print(run_find_best_path_for_cost_dijsktras('Boone', 'Chapel Hill'))
+    print(run_find_best_path_for_cost_dijsktras('Boone', 'Chapel Hill'))
 
     # print(run_estimate_neighborhood_size("Westpark Place"))
     

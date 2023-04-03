@@ -36,6 +36,7 @@ def convert_to_nx(graph: Network, path_tuple: Optional[tuple(float, list[str])] 
     
     if path_tuple is not None:
         path = path_tuple[1]
+        path_endpoints_list = [{path[i], path[i + 1]} for i in range(0, len(path) - 1)]
 
     for link in links:
         endpoints = list(link.get_endpoints())
@@ -43,14 +44,10 @@ def convert_to_nx(graph: Network, path_tuple: Optional[tuple(float, list[str])] 
         
         for n in endpoints:
             if not new.has_node(n.name):
-                new.add_node(n.name, size=math.log(n.size) * 50)
-                # print(n.size)
+                new.add_node(n.name, size=int(math.log(n.size + 1) * 50))
 
-        path_endpoint_names = {endpoints[0].name, endpoints[1].name}
-        if path_tuple is not None and path != [] and path[0] in path_endpoint_names and path[1] in path_endpoint_names:
-            path.pop(0)
-            if len(path) == 1:
-                path.pop(0)
+        endpoints_string_set = {endpoints[0].name, endpoints[1].name}
+        if path_tuple is not None and endpoints_string_set in path_endpoints_list:
             new.add_edge(endpoints[0].name, endpoints[1].name, weight=cost, color='red')
         else:
             new.add_edge(endpoints[0].name, endpoints[1].name, weight=cost, color='black')
@@ -73,8 +70,8 @@ def display_graph(nx_graph: nx.Graph) -> None:
     """
     pos = nx.spring_layout(nx_graph, k=5/math.sqrt(nx_graph.order()), seed=7)
     
-    sizes = nx.get_node_attributes(nx_graph,'size').values()
-    nx.draw_networkx_nodes(nx_graph, pos, node_size=[s for s in sizes], node_color="red")
+    sizes = [s for s in nx.get_node_attributes(nx_graph,'size').values()]
+    nx.draw_networkx_nodes(nx_graph, pos, node_size=sizes, node_color="red")
 
     edges = nx_graph.edges()
     colors = [nx_graph[u][v]['color'] for u,v in edges]
