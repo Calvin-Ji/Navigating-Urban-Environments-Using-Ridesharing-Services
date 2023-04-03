@@ -15,7 +15,7 @@ Copyright and Usage Information
 This file is Copyright (c) 2023 by Gerald Wang, Mark Estiller, Calvin Ji, Dharma Ong.
 This module is expected to use data from:
 https://www.kaggle.com/datasets/zusmani/uberdrives
-"My Uber Drives" by user Zeeshan-Ul-Hassan Usmani. The data encompassed his Uber drives primarily in North Carolina
+"My Uber Drives" by user Zeeshan-Ul-Hassan Usmani. The data encompassed his Uber drives
 in 2016 (1,175 drives total), and it was presented as a csv with the following columns going from left to right:
 start date, end date, category, start, stop, number of miles, and purpose.
 """
@@ -236,7 +236,7 @@ def run_find_best_path_for_cost_dijsktras(start: str, end: str) -> tuple[float, 
 
 
 def run_estimate_neighborhood_size(neighborhood: str) -> float:
-    """Returns an estimate of the size of North Carolina by adding up all the estimated neighborhood sizes
+    """Returns an estimate of the size of a neighborhood in square miles
 
     Preconditions:
     - neighborhood in ALL_NEIGHBORHOODS
@@ -325,3 +325,7 @@ if __name__ == '__main__':
             start_loop = True
         else:
             start_loop = False
+
+    # neighborhood size estimates
+    print(run_estimate_neighborhood_size('Cary'))  # Actual size: 61.05 mi²
+    print(run_estimate_neighborhood_size('Midtown'))  # Actual size: 2.254 mi²

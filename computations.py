@@ -10,7 +10,7 @@ Copyright and Usage Information
 This file is Copyright (c) 2023 by Gerald Wang, Mark Estiller, Calvin Ji, Dharma Ong.
 This module is expected to use data from:
 https://www.kaggle.com/datasets/zusmani/uberdrives
-"My Uber Drives" by user Zeeshan-Ul-Hassan Usmani. The data encompassed his Uber drives primarily in North Carolina
+"My Uber Drives" by user Zeeshan-Ul-Hassan Usmani. The data encompassed his Uber drives
 in 2016 (1,175 drives total), and it was presented as a csv with the following columns going from left to right:
 start date, end date, category, start, stop, number of miles, and purpose.
 
@@ -122,7 +122,7 @@ def combine_dict_times_miles_cost(avg_times_and_miles: dict[tuple[str], list[flo
 def create_graph(d: dict[tuple[str, str], list[float]]) -> Network:
     """
     Generates and returns a network, given a tuple consisting of the neighborhood endpoints as keys,
-    with its corresponidng average time at index 0,average distance at index 1, and average cost at index 2.
+    with its corresponidng average time at index 0, average distance at index 1, and average cost at index 2.
     """
 
     network = Network()
